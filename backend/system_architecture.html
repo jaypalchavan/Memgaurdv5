@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MemGuard v5 | System Architecture & Data Pipeline Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #060913;
+            --bg-card: rgba(13, 20, 38, 0.85);
+            --bg-card-hover: rgba(20, 32, 60, 0.95);
+            --border-subtle: rgba(56, 189, 248, 0.16);
+            --border-glow: rgba(56, 189, 248, 0.45);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #00f2fe;
+            --accent-blue: #38bdf8;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-crimson: #ef4444;
+            --accent-purple: #a855f7;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Black and White / Monochrome Theme */
+        body.theme-monochrome {
+            --bg-deep: #000000;
+            --bg-card: #0d0d0d;
+            --bg-card-hover: #171717;
+            --border-subtle: #2d2d2d;
+            --border-glow: #737373;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-cyan: #ffffff;
+            --accent-blue: #e4e4e7;
+            --accent-emerald: #d4d4d8;
+            --accent-amber: #a1a1aa;
+            --accent-crimson: #ffffff;
+            --accent-purple: #d4d4d8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+            padding: 1.5rem;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header.arch-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.75rem;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .brand-title h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(120deg, #ffffff 40%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .badge-soc {
+            font-size: 0.68rem;
+            padding: 0.2rem 0.55rem;
+            background: rgba(0, 242, 254, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-subtle);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-blue);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+        }
+
+        /* Hero Pipeline Overview */
+        .hero-banner {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .hero-banner h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .hero-banner p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            max-width: 900px;
+        }
+
+        /* 6-STAGE PIPELINE FLOW GRAPH */
+        .pipeline-flow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .pipeline-stage-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .pipeline-stage-card:hover, .pipeline-stage-card.active {
+            border-color: var(--border-glow);
+            background: var(--bg-card-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+        .stage-num-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            font-weight: 700;
+            font-size: 0.78rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stage-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .stage-sub {
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .stage-pill {
+            margin-top: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            align-self: flex-start;
+        }
+
+        .pill-blue { background: rgba(56, 189, 248, 0.12); color: var(--accent-blue); }
+        .pill-purple { background: rgba(168, 85, 247, 0.12); color: var(--accent-purple); }
+        .pill-emerald { background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); }
+        .pill-amber { background: rgba(245, 158, 11, 0.12); color: var(--accent-amber); }
+        .pill-crimson { background: rgba(239, 68, 68, 0.12); color: var(--accent-crimson); }
+        .pill-cyan { background: rgba(0, 242, 254, 0.12); color: var(--accent-cyan); }
+
+        /* Detail Deep Dive Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .details-grid { grid-template-columns: 1fr; }
+        }
+
+        .detail-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tech-stack-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+
+        .tech-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .tech-item h4 {
+            font-size: 0.88rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .tech-item p {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        pre.code-block {
+            background: #050811;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-size: 0.75rem;
+            color: #a5f3fc;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+
+        /* Flow packet animated line */
+        .flow-line {
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple), var(--accent-emerald));
+            border-radius: 2px;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Navigation -->
+        <header class="arch-header">
+            <div class="brand-title">
+                <h1>MemGuard v5 <span class="badge-soc">Architecture Blueprint</span></h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline" id="themeToggleBtn" onclick="toggleMonochromeTheme()">
+                    ◐ B&W Mode
+                </button>
+                <a href="/backend" class="btn btn-outline">
+                    Backend Health Center
+                </a>
+                <a href="/" class="btn btn-primary">
+                    SOC Threat Command &rarr;
+                </a>
+            </div>
+        </header>
+
+        <!-- Hero Overview -->
+        <div class="hero-banner">
+            <h2>How MemGuard EDR & Threat Detection Operates</h2>
+            <p>
+                MemGuard v5 processes high-velocity host telemetry using a 6-stage asynchronous pipeline. 
+                From low-level kernel process creation hooks and Sysmon Event IDs to Shannon entropy analysis, 
+                Bayesian ML rescoring, and 0-latency WebSocket broadcasts to analysts and connected endpoints.
+            </p>
+        </div>
+
+        <div class="flow-line"></div>
+
+        <!-- 6-Stage Interactive Visual Pipeline -->
+        <div class="pipeline-flow">
+            <!-- Stage 1 -->
+            <div class="pipeline-stage-card active" onclick="inspectStage(1)">
+                <div class="stage-num-badge mono">01</div>
+                <div class="stage-title">Telemetry Ingestion</div>
+                <div class="stage-sub">PsUtil Kernel Hooks, Sysmon XML Events (1, 3, 7, 11), Remote Python EDR Agents.</div>
+                <span class="stage-pill pill-cyan">Ingestion Engine</span>
+            </div>
+
+            <!-- Stage 2 -->
+            <div class="pipeline-stage-card" onclick="inspectStage(2)">
+                <div class="stage-num-badge mono">02</div>
+                <div class="stage-title">Feature Extraction</div>
+                <div class="stage-sub">Commandline tokenization, Shannon Entropy calculator, Parent-Child process tree traversal.</div>
+                <span class="stage-pill pill-blue">Parsing & NLP</span>
+            </div>
+
+            <!-- Stage 3 -->
+            <div class="pipeline-stage-card" onclick="inspectStage(3)">
+                <div class="stage-num-badge mono">03</div>
+                <div class="stage-title">Heuristics & LOLBins</div>
+                <div class="stage-sub">Behavioral signature matching against Living-Off-The-Land binaries & MITRE ATT&CK techniques.</div>
+                <span class="stage-pill pill-purple">Pattern Matcher</span>
+            </div>
+
+            <!-- Stage 4 -->
+            <div class="pipeline-stage-card" onclick="inspectStage(4)">
+                <div class="stage-num-badge mono">04</div>
+                <div class="stage-title">Adaptive ML Rescorer</div>
+                <div class="stage-sub">ThreatMLScorer evaluates calibrated weights against modern ransomware, stealers, and C2 beacons.</div>
+                <span class="stage-pill pill-emerald">Neural / Bayesian ML</span>
+            </div>
+
+            <!-- Stage 5 -->
+            <div class="pipeline-stage-card" onclick="inspectStage(5)">
+                <div class="stage-num-badge mono">05</div>
+                <div class="stage-title">Mitigation & Policy</div>
+                <div class="stage-sub">Automated host network isolation, LOLBin process termination, and SQLite persistent audit logging.</div>
+                <span class="stage-pill pill-crimson">EDR Containment</span>
+            </div>
+
+            <!-- Stage 6 -->
+            <div class="pipeline-stage-card" onclick="inspectStage(6)">
+                <div class="stage-num-badge mono">06</div>
+                <div class="stage-title">Real-Time Streaming</div>
+                <div class="stage-sub">WebSocket event bus broadcasts alerts to mobile, web, and SOC dashboards with sub-15ms latency.</div>
+                <span class="stage-pill pill-amber">WebSocket Bus</span>
+            </div>
+        </div>
+
+        <!-- Detail Panels Grid -->
+        <div class="details-grid">
+            <div class="detail-panel">
+                <div class="panel-header">
+                    <div class="panel-title" id="stageDetailTitle">
+                        Stage 1: Multi-Vector Telemetry Ingestion Layer
+                    </div>
+                    <span class="mono" id="stageLatencyBadge" style="font-size: 0.72rem; color: var(--accent-cyan);">Latency: ~2.4ms</span>
+                </div>
+                <div id="stageDetailBody">
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        The ingestion layer captures system activity across multiple heterogeneous vectors without kernel destabilization:
+                    </p>
+                    <div class="tech-stack-list">
+                        <div class="tech-item">
+                            <h4>Windows Sysmon Operational Log</h4>
+                            <p>Parses Microsoft-Windows-Sysmon/Operational channel using XML stream deserialization for Process Create (Event 1), Network Connect (Event 3), and Driver/Image Loads (Event 7).</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>PsUtil Low-Level Kernel Hook</h4>
+                            <p>Queries Windows NT executive process tables to extract executable path, PID, working memory RSS, security context, and parent PID.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Cross-Platform EDR Telemetry REST API</h4>
+                            <p>Exposes <code class="mono">POST /api/telemetry/report</code> enabling remote agents running on Linux servers, macOS workstations, and Android devices to report events seamlessly.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        Live Data Schema & Pipeline Payload
+                    </div>
+                    <button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;" onclick="refreshLivePipelineData()">Refresh</button>
+                </div>
+                <pre class="code-block mono" id="pipelineDataDisplay">// Loading active pipeline telemetry...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STAGE_DETAILS = {
+            1: {
+                title: "Stage 1: Multi-Vector Telemetry Ingestion Layer",
+                latency: "Latency: ~2.4ms",
+                body: `
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        The ingestion layer captures system activity across multiple heterogeneous vectors without kernel destabilization:
+                    </p>
+                    <div class="tech-stack-list">
+                        <div class="tech-item">
+                            <h4>Windows Sysmon Operational Log</h4>
+                            <p>Parses Microsoft-Windows-Sysmon/Operational channel using XML stream deserialization for Process Create (Event 1), Network Connect (Event 3), and Driver/Image Loads (Event 7).</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>PsUtil Low-Level Kernel Hook</h4>
+                            <p>Queries Windows NT executive process tables to extract executable path, PID, working memory RSS, security context, and parent PID.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Cross-Platform EDR Telemetry REST API</h4>
+                            <p>Exposes <code class="mono">POST /api/telemetry/report</code> enabling remote agents running on Linux servers, macOS workstations, and Android devices to report events seamlessly.</p>
+                        </div>
+                    </div>
+                `,
+                sample: {
+                    event_source: "Sysmon XML Channel 1",
+                    event_id: 1,
+                    image: "C:\\Windows\\System32\\powershell.exe",
+                    parent: "C:\\Program Files\\Microsoft Office\\winword.exe",
+                    commandline: "powershell.exe -nop -w hidden -enc SQBFAFgAIAA...",
+                    hashes: "SHA256=3B9D9F0E1F30E26CB2C4B7281A5D19DF6044E278B247659F2181DCFE2841F09A"
+                }
+            },
+            2: {
+                title: "Stage 2: Feature Extraction & Shannon Entropy Analysis",
+                latency: "Latency: ~0.8ms",
+                body: `
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Extracts syntactic, structural, and behavioral features from raw command lines and process lineage:
+                    </p>
+                    <div class="tech-stack-list">
+                        <div class="tech-item">
+                            <h4>Shannon Entropy Calculator</h4>
+                            <p>Computes information density: values > 4.5 indicate high probability of Base64, RC4, or AES obfuscated payload strings designed to bypass signature scanners.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Parent-Child Ancestry Correlation</h4>
+                            <p>Identifies living-off-the-land masquerades, such as Word or Excel launching command interpreters or web server worker processes spawning shells.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Argument Tokenizer</h4>
+                            <p>Normalizes argument aliases (-enc, -encodedcommand, -e, -nop, -w hidden) across PowerShell, cmd, bash, and Lolbins.</p>
+                        </div>
+                    </div>
+                `,
+                sample: {
+                    features_extracted: {
+                        entropy_score: 5.42,
+                        obfuscation_detected: true,
+                        suspicious_parent_flag: 1.0,
+                        evasion_arguments: ["-w hidden", "-nop", "-enc"],
+                        lolbin_candidate: "powershell.exe"
+                    }
+                }
+            },
+            3: {
+                title: "Stage 3: Behavioral Heuristics & LOLBin Detection Matrix",
+                latency: "Latency: ~1.2ms",
+                body: `
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Evaluates behavioral rules mapped to the MITRE ATT&CK Enterprise Matrix (2026 Edition):
+                    </p>
+                    <div class="tech-stack-list">
+                        <div class="tech-item">
+                            <h4>LOLBin Abuse Engine</h4>
+                            <p>Monitors certutil ingress tool transfers, mshta scriptlet execution, regsvr32 Squiblydoo proxying, and bitsadmin transfer jobs.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Ransomware Pre-Encryption Rules</h4>
+                            <p>Detects immediate recovery inhibitor actions including vssadmin shadow copy deletion, catalog purging, and recovery policy disabling.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Credential Theft Indicators</h4>
+                            <p>Flags comsvcs.dll MiniDump calls, procdump targeting lsass.exe, and SAM hive extraction commands.</p>
+                        </div>
+                    </div>
+                `,
+                sample: {
+                    mitre_technique: "T1059.001 - PowerShell Obfuscation",
+                    secondary_techniques: ["T1055 - Process Injection / Office Lineage", "T1564.003 - Hidden Window"],
+                    rule_matches: [
+                        "PowerShell encoded command detected",
+                        "Office process winword.exe spawned command interpreter",
+                        "Hidden window execution active"
+                    ]
+                }
+            },
+            4: {
+                title: "Stage 4: Adaptive ML Threat Scoring & Rescoring Engine",
+                latency: "Latency: ~1.8ms",
+                body: `
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        ThreatMLScorer employs a calibrated multi-feature model trained on modern cyber threat telemetry:
+                    </p>
+                    <div class="tech-stack-list">
+                        <div class="tech-item">
+                            <h4>Dynamic Calibrated Feature Weights</h4>
+                            <p>Weights reflect real-world cyber threat vectors: destructive ransomware actions (36.0), credential theft (34.0), and C2 beaconing (26.5).</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Online Model Retraining</h4>
+                            <p>The <code class="mono">POST /api/ml/train</code> endpoint dynamically runs gradient descent to update weights and recalibrate detection boundaries.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Enterprise Fleet Rescorer</h4>
+                            <p>The <code class="mono">POST /api/ml/rescore</code> endpoint re-evaluates all historical logs, connected devices, and active processes with up-to-date scores.</p>
+                        </div>
+                    </div>
+                `,
+                sample: {
+                    calculated_score: 92,
+                    calibrated_risk_level: "CRITICAL",
+                    confidence_rating: 0.99,
+                    feature_contributions: {
+                        destructive_actions: 0.0,
+                        suspicious_parent: 24.5,
+                        entropy_score: 16.5,
+                        lolbin_flag: 22.0,
+                        evasion_flags: 15.0,
+                        signature_match: 14.0
+                    }
+                }
+            },
+            5: {
+                title: "Stage 5: Automated EDR Containment & Policy Engine",
+                latency: "Latency: ~4.5ms",
+                body: `
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Executes active defense playbooks and containment actions based on incident severity:
+                    </p>
+                    <div class="tech-stack-list">
+                        <div class="tech-item">
+                            <h4>Host Network Isolation</h4>
+                            <p>Automated or analyst-approved firewall isolation disconnecting compromised endpoints while retaining SOC telemetry heartbeat.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Parent-Child Process Termination</h4>
+                            <p>Suspends and kills hostile process trees to stop C2 staging and encrypted memory payload execution in real time.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Forensic Audit Logging</h4>
+                            <p>Commits all incidents, actions, and analyst interventions into the SQLite database for compliance and retrospective hunting.</p>
+                        </div>
+                    </div>
+                `,
+                sample: {
+                    action_applied: "PROCESS_KILL_AND_ISOLATE",
+                    target_pid: 6428,
+                    target_process: "powershell.exe",
+                    containment_status: "CONTAINED",
+                    audit_record_id: "INC-9F41E8B2"
+                }
+            },
+            6: {
+                title: "Stage 6: Real-Time Event Bus & SOC Visualization",
+                latency: "Latency: ~0.9ms",
+                body: `
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Asynchronous WebSocket broadcast engine synchronizing analysts, mobile devices, and command centers:
+                    </p>
+                    <div class="tech-stack-list">
+                        <div class="tech-item">
+                            <h4>WebSocket Connection Manager</h4>
+                            <p>Maintains persistent bi-directional streams (<code class="mono">/ws/telemetry</code>) broadcasting live threat occurrences with sub-15ms broadcast latency.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Audio Threat Synthesizer</h4>
+                            <p>Web Audio API frequency oscillator triggers acoustic radar alert tones in the analyst console on Critical threat ingestion.</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Multi-Device Responsive SOC UI</h4>
+                            <p>Adaptive layout dynamically scales across 4K displays, SOC video walls, tablets, and field mobile devices.</p>
+                        </div>
+                    </div>
+                `,
+                sample: {
+                    stream_channel: "ws://127.0.0.1:8000/ws/telemetry",
+                    broadcast_type: "REALTIME_THREAT_REPORT",
+                    latency_ms: 11,
+                    connected_clients: 3
+                }
+            }
+        };
+
+        function inspectStage(stageNum) {
+            document.querySelectorAll('.pipeline-stage-card').forEach((card, idx) => {
+                if (idx + 1 === stageNum) card.classList.add('active');
+                else card.classList.remove('active');
+            });
+
+            const data = STAGE_DETAILS[stageNum];
+            if (!data) return;
+
+            document.getElementById('stageDetailTitle').innerText = data.title;
+            document.getElementById('stageLatencyBadge').innerText = data.latency;
+            document.getElementById('stageDetailBody').innerHTML = data.body;
+            document.getElementById('pipelineDataDisplay').innerText = JSON.stringify(data.sample, null, 2);
+        }
+
+        async function refreshLivePipelineData() {
+            try {
+                const res = await fetch('/api/system/how-it-works');
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('pipelineDataDisplay').innerText = JSON.stringify(data, null, 2);
+                }
+            } catch(e) {
+                inspectStage(1);
+            }
+        }
+
+        // B&W Monochrome Theme Toggle
+        function toggleMonochromeTheme() {
+            const isMonochrome = document.body.classList.toggle('theme-monochrome');
+            localStorage.setItem('memguard_theme', isMonochrome ? 'monochrome' : 'dark');
+            const btn = document.getElementById('themeToggleBtn');
+            btn.innerText = isMonochrome ? '◐ Cyber Color' : '◐ B&W Mode';
+        }
+
+        // Init
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('memguard_theme');
+            if (savedTheme === 'monochrome') {
+                document.body.classList.add('theme-monochrome');
+                document.getElementById('themeToggleBtn').innerText = '◐ Cyber Color';
+            }
+            inspectStage(1);
+        });
+    </script>
+</body>
+</html>

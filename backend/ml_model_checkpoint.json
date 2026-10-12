@@ -1,0 +1,24 @@
+{
+  "weights": {
+    "entropy_score": 27.04986497114185,
+    "lolbin_flag": 45.13455799117367,
+    "suspicious_parent": 29.074881595683742,
+    "evasion_flags": 33.008844054852446,
+    "destructive_actions": 44.30353505189546,
+    "credential_theft": 35.98546814263965,
+    "c2_indicator": 29.303984274359493,
+    "signature_match": 40.0
+  },
+  "bias": -18.22691014708586,
+  "metadata": {
+    "version": "v5.2-NeuralSOC-Calibrated",
+    "last_trained": "2026-10-12T18:44:35.772857Z",
+    "samples_trained": 14,
+    "accuracy": 0.6429,
+    "precision": 1.0,
+    "recall": 0.375,
+    "f1_score": 0.5455,
+    "epochs": 120,
+    "loss": 0.3028
+  }
+}

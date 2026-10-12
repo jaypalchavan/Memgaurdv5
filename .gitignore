@@ -1,0 +1,43 @@
+# Python
+venv/
+backend/venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+dist/
+*.egg-info/
+
+# Local Database & Logs
+*.db
+*.sqlite3
+backend/memguard.db
+*.log
+
+# Java / Maven
+HELP.md
+target/
+.mvn/
+mvnw
+mvnw.cmd
+pom.xml
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.iws
+*.iml
+*.ipr
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+.DS_Store
+Thumbs.db
+

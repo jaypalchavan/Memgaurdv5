@@ -1,0 +1,6 @@
+fastapi==0.111.0
+uvicorn==0.30.1
+sqlalchemy==2.0.36
+pydantic==2.7.4
+psutil
+python-logstash
