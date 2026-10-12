@@ -4,3 +4,4 @@ sqlalchemy==2.0.36
 pydantic==2.7.4
 psutil
 python-logstash
+websockets
