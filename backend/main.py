@@ -200,6 +200,10 @@ async def websocket_telemetry(websocket: WebSocket):
     except Exception:
         manager.disconnect(websocket)
 
+@app.get("/health")
+def get_health():
+    return {"status": "ok", "service": "MemGuard v5", "version": "5.2.0-SOC-Enterprise"}
+
 @app.get("/")
 def get_dashboard():
     frontend_index = os.path.join(frontend_dir, "index.html")
